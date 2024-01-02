@@ -1958,10 +1958,52 @@ define(['N/format', 'N/record', 'N/search'], function (format, record, search) {
   function getManualOpenID() {
     return 'MI' 
   }
+  
+  function getVoucherMigType(gw_voucher_type){
+	var _mig_type_option = 1	
+	try {
+      var _mySearch = search.create({
+        type: 'customrecord_gw_mig_type',
+        columns: [
+          search.createColumn({ name: 'custrecord_gw_mt_egui_type' }),
+          search.createColumn({ name: 'custrecord_gw_mt_action_mode' }),
+          search.createColumn({ name: 'custrecord_gw_mt_bus_tran_type' }),
+          search.createColumn({ name: 'custrecord_gw_mt_mig_type' })
+        ]
+      })
+
+      var _filterArray = []      
+      
+      if (gw_voucher_type=="ALLOWANCE") gw_voucher_type='Allowance'
+    	  
+	  _filterArray.push(['custrecord_gw_mt_bus_tran_type', 'is', 'B2C'])
+      _filterArray.push('and') 
+      _filterArray.push(['custrecord_gw_mt_egui_type', 'is', gw_voucher_type])
+      _filterArray.push('and') 
+      if (gw_voucher_type=='EGUI'){
+    	  _filterArray.push(['custrecord_gw_mt_mig_type', 'is', 'C0401'])
+      }else{
+    	  _filterArray.push(['custrecord_gw_mt_mig_type', 'is', 'D0401'])
+      } 
+      //_filterArray.push('and') 
+      //_filterArray.push(['custrecord_gw_mt_action_mode', 'is', 'ISSUE'])
+      _mySearch.filterExpression = _filterArray
+
+      _mySearch.run().each(function (result) {
+    	  _mig_type_option = result.id 
+          return true
+      })
+    } catch (e) {
+      log.error(e.name, e.message)
+    }    
+    return _mig_type_option
+  }
+	  
 
   /////////////////////////////////////////////////////////////////////////////////////////////
 
   return {
+	getVoucherMigType: getVoucherMigType,
     getBusinessEntitByUserId: getBusinessEntitByUserId,
     loadAllTaxInformation: loadAllTaxInformation,
     getApplyPeriodOptionId: getApplyPeriodOptionId,
