@@ -15,11 +15,13 @@ define([
   '../gw_common_utility/gw_common_invoice_utility',
   '../gw_common_utility/gw_common_date_utility',
   '../gw_common_utility/gw_common_configure',
+  '../gw_common_utility/gw_preferences_utils',
   '../gw_common_utility/gw_syncegui_to_document_utility',
   '../../gw_dao/taxType/gw_dao_tax_type_21',
-  '../../gw_dao/docFormat/gw_dao_doc_format_21', 
+  '../../gw_dao/docFormat/gw_dao_doc_format_21',
   '../../gw_dao/carrierType/gw_dao_carrier_type_21',
-  '../../gw_dao/settings/gw_dao_egui_config'
+  '../gw_dao/gw_transaction_fields',
+  '../../library/gw_date_util'
 ], function (
   runtime,
   config,
@@ -31,11 +33,13 @@ define([
   invoiceutility,
   dateutility,
   gwconfigure,
+  gwpreferences,
   synceguidocument,
-  taxyype21,
+  taxType21,
   doc_format_21,
   carriertypedao,
-  gwDaoEguiConfig
+  gwTransactionFields,
+  gwDateUtil
 ) {
   var _invoceFormatCode = gwconfigure.getGwVoucherFormatInvoiceCode()
   var _creditMemoFormatCode = gwconfigure.getGwVoucherFormatAllowanceCode()
@@ -75,6 +79,9 @@ define([
   var _gw_allowance_num_start_field = 'custbody_gw_allowance_num_start'
   var _gw_allowance_num_end_field = 'custbody_gw_allowance_num_end'
   var _deduction_egui_number_field = 'custbody_gw_creditmemo_deduction_list'
+	  
+  //日期格式
+  var _userDateFormat = 'YYYY/MM/DD';
 
   var _allowance_pre_code = ''
   
@@ -92,13 +99,17 @@ define([
 
   //放期別資料
   var _apply_period_options_ary = []
+  //EGUI
+  var _egui_gw_dm_mig_type = 1
+  //ALLOWANCE
+  var _allowance_gw_dm_mig_type = 4
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
   //1.取得稅別資料
   function loadAllTaxInformation() {
     try {
-	  var _all_tax_types = taxyype21.getAll()
+	  var _all_tax_types = taxType21.getAll()
 	  log.debug('get all_tax_types', JSON.stringify(_all_tax_types))
- 
+
 	  for (var i=0; i<_all_tax_types.length; i++) {
 		   var _tax_json_obj = _all_tax_types[i]
 		   var _ns_tax_json_obj = _tax_json_obj.taxCodes
@@ -109,7 +120,7 @@ define([
               _netsuite_id_value = _ns_tax_json_obj.value //111;
               _netsuite_id_text = _ns_tax_json_obj.text //Jul 2020;
            }
-		   
+
 		   var _obj = {
 			  voucher_property_id: _tax_json_obj.name, //TAX_WITH_TAX
 			  voucher_property_value: _tax_json_obj.value, //1
@@ -119,8 +130,8 @@ define([
 		   }
 
 		   _taxObjAry.push(_obj)
-		   
-	  } 
+
+	  }
     } catch (e) {
       log.error(e.name, e.message)
     }
@@ -244,10 +255,12 @@ define([
   }
 
   //取得會計科目
-  function getNSInvoiceAccount(_egui_tax_id) {   
+  function getNSInvoiceAccount(_egui_tax_id) {
+    log.debug({title: 'getNSInvoiceAccount - _taxObjAry', details: _taxObjAry})
+    log.debug({title: 'getNSInvoiceAccount - _egui_tax_id', details: _egui_tax_id})
 	 return _taxObjAry.filter(function (_obj) {
 	      return _obj.voucher_property_value.toString() === _egui_tax_id.toString()
-	 })[0].netsuite_id_value 
+	 })[0].netsuite_id_value
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -419,6 +432,125 @@ define([
     return _incoiceIdjAry
   }
 
+  function getSearchInvoiceFilters(selectedInvoiceIds) {
+    var searchFilters = []
+    searchFilters.push(['type', 'anyof', 'CustInvc'])
+    searchFilters.push('AND')
+    searchFilters.push(['taxline', 'is', 'F'])
+    searchFilters.push('AND')
+    searchFilters.push(['cogs', 'is', 'F'])
+    searchFilters.push('AND')
+    searchFilters.push(['shipping', 'is', 'F'])
+    searchFilters.push('AND')
+    searchFilters.push(['status', 'noneof', 'CustInvc:V'])
+    searchFilters.push('AND')
+    searchFilters.push([
+      [
+        ['mainline', 'is', 'T']
+      ],
+      'OR',
+      [
+        ['mainline', 'is', 'F'],
+        'AND',
+        ['item', 'noneof', '@NONE@']
+      ]
+    ])
+
+    if (selectedInvoiceIds.length) {
+      log.debug({title: 'getSearchInvoiceFilters - selectedInvoiceIds', details: selectedInvoiceIds})
+      searchFilters.push('AND')
+      searchFilters.push(['internalid', 'anyof', selectedInvoiceIds])
+
+    }
+    searchFilters.push('AND')
+    searchFilters.push(['custbody_gw_gui_num_start', search.Operator.ISEMPTY, ''])
+    searchFilters.push('AND')
+    searchFilters.push(['custbody_gw_gui_num_end', search.Operator.ISEMPTY, ''])
+    searchFilters.push('AND')
+    searchFilters.push(['custbody_gw_allowance_num_start', search.Operator.ISEMPTY, ''])
+    searchFilters.push('AND')
+    searchFilters.push(['custbody_gw_allowance_num_end', search.Operator.ISEMPTY, ''])
+
+    return searchFilters;
+  }
+
+  function getSearchColumns() {
+    var searchColumns = []
+    // searchColumns.push(search.createColumn({name: 'subsidiary'}))
+    gwTransactionFields.allSearchColumnFields.forEach(function (searchFieldId) {
+      // log.debug({title: 'getSearchColumns - searchFieldId', details: searchFieldId})
+      searchColumns.push(searchFieldId)
+    })
+    log.debug({title: 'getSearchColumns - searchColumns', details: searchColumns})
+    return searchColumns;
+  }
+
+  function getSearchSetting() {
+    var searchSetting = []
+    searchSetting.push(
+        search.createSetting({
+          name: 'consolidationtype',
+          value: 'NONE'
+        })
+    )
+    return searchSetting;
+  }
+  function getInvoiceDetailsById(selectedInvoiceIds) {
+    log.debug({title: 'getInvoiceDetailsById - start ...', details: ''});
+    var searchFilters = getSearchInvoiceFilters(selectedInvoiceIds)
+    var searchColumns = getSearchColumns()
+    var searchSetting = getSearchSetting()
+    var invoiceSearchObj = search.create({
+      type: gwTransactionFields.recordId,
+      filters: searchFilters,
+      columns: searchColumns,
+      settings: searchSetting
+    });
+    var searchResultCount = invoiceSearchObj.runPaged().count;
+    log.debug({title: 'getInvoiceDetailsById - invoiceSearchObj result count', details: searchResultCount});
+    var searchResultArray = []
+
+    var searchObj = invoiceSearchObj.runPaged({
+      pageSize: 1000
+    });
+    log.debug({title: 'getInvoiceDetailsById - searchObj', details: searchObj})
+
+    searchObj.pageRanges.forEach(function (pageRange) {
+      searchObj.fetch({index: pageRange.index}).data.forEach(function (result) {
+        //Process each search result here
+        log.debug({title: 'getInvoiceDetailsById - result', details: result})
+        searchResultArray.push(JSON.parse(JSON.stringify(result)))
+      });
+    });
+
+    log.debug({title: 'getInvoiceDetailsById - searchResultArray', details: searchResultArray})
+    log.debug({title: 'getInvoiceDetailsById - end ...', details: ''});
+    return searchResultArray
+  }
+
+  function composeResultObject(transactionSearchResultArray) {
+    let resultArray = []
+    transactionSearchResultArray.forEach(function (transactionSearchResultObject) {
+      log.debug({title: 'composeResultObject - transactionSearchResultObject', details: transactionSearchResultObject})
+      let optionObject = {};
+      gwTransactionFields.allFieldIds.forEach(function (searchFieldId) {
+        const searchColumnObject = gwTransactionFields.fields[searchFieldId]
+        log.debug({title: 'composeResultObject - searchColumnObject', details: searchColumnObject})
+        let attribute = searchColumnObject.name;
+        if (searchColumnObject.join) attribute = `${searchColumnObject.join}.${attribute}`
+        optionObject[searchColumnObject.outputField] =
+            (attribute !== '' && transactionSearchResultObject.values[attribute])
+                ? transactionSearchResultObject.values[attribute] : ''
+      })
+      optionObject.id = transactionSearchResultObject.id
+      optionObject.recordType = transactionSearchResultObject.recordType
+      log.debug({title: 'composeResultObject - optionObject', details: JSON.stringify(optionObject)})
+      resultArray.push(optionObject)
+    })
+    log.debug({title: 'composeResultObject - resultArray', details: JSON.stringify(resultArray)})
+    return resultArray
+  }
+
   function getVoucherInvoiceMainAndDetails(
     mig_type,
     companyInfo,
@@ -442,6 +574,9 @@ define([
       log.debug('_nsTaxFreeTaxValue', _nsTaxFreeTaxValue)
       log.debug('_nsTaxZeroTaxValue', _nsTaxZeroTaxValue)
 
+      const invoiceSearchResultArray = getInvoiceDetailsById(internalIdAry)
+      const invoiceDetailsArrayObject = composeResultObject(invoiceSearchResultArray)
+/**
       var _mySearch = search.load({
         id: _gw_invoice_detail_search_id,
       })
@@ -489,7 +624,7 @@ define([
 
         _mySearch.filterExpression = _filterArray
         log.debug('_filterArray', JSON.stringify(_filterArray))
-
+**/
         var _checkID = ''
         var _mainJsonObj
         var _discountItemJsonObj
@@ -527,116 +662,119 @@ define([
         var _line_index = 1
 
         var _existFlag = false
-        _mySearch.run().each(function (result) {
+
+
+        // _mySearch.run().each(function (result) {
+        invoiceDetailsArrayObject.forEach(function (result){
           var _result = JSON.parse(JSON.stringify(result))
           log.debug('Invoice Detail Search Result', JSON.stringify(result))
           //1.Main Information
           var _id = _result.id //840
-          var _itemtype = _result.values.itemtype //InvtPart or Discount
-          var _mainline = _result.values.mainline
+          var _itemtype = result.itemtype //InvtPart or Discount
+          var _mainline = result.mainline
 
-          var _account_value = '' //54
-          var _account_text = '' //4000 Sales
-          if (_result.values.account.length != 0) {
-            _account_value = _result.values.account[0].value //54
-            _account_text = _result.values.account[0].text //4000 Sales
-          }
+          // var _account_value = '' //54
+          // var _account_text = '' //4000 Sales
+          // if (result.account.length != 0) {
+          //   _account_value = result.account[0].value //54
+          //   _account_text = result.account[0].text //4000 Sales
+          // }
 
           /////////////////////////////////////////////////////////////////////////////////////
           if (_mainline != '*' && stringutility.trim(_itemtype) != '') {
             _existFlag = true
             ///////////////////////////////////////////////////////////////////////////////////////////
             //取得資料-START
-            var _trandate = _result.values.trandate //2020-07-06
+            var _trandate = result.trandate //2020-07-06
             var _postingperiod_value = '' //111
             var _postingperiod_text = '' //Jul 2020
-            if (_result.values.postingperiod.length != 0) {
-              _postingperiod_value = _result.values.postingperiod[0].value //111
-              _postingperiod_text = _result.values.postingperiod[0].text //Jul 2020
-            }
+            // if (result.postingperiod.length != 0) {
+            //   _postingperiod_value = result.postingperiod[0].value //111
+            //   _postingperiod_text = result.postingperiod[0].text //Jul 2020
+            // }
             var _taxperiod_value = '' //111;
             var _taxperiod_text = '' //Jul 2020;
-            if (_result.values.taxperiod.length != 0) {
-              _taxperiod_value = _result.values.taxperiod[0].value //111;
-              _taxperiod_text = _result.values.taxperiod[0].text //Jul 2020;
-            }
+            // if (result.taxperiod.length != 0) {
+            //   _taxperiod_value = result.taxperiod[0].value //111;
+            //   _taxperiod_text = result.taxperiod[0].text //Jul 2020;
+            // }
 
             var _type_value = '' //CustInvc
             var _type_text = '' //Invoice
-            if (_result.values.type.length != 0) {
-              _type_value = _result.values.type[0].value //CustInvc
-              _type_text = _result.values.type[0].text //Invoice
+            if (result.type.length != 0) {
+              _type_value = result.type[0].value //CustInvc
+              _type_text = result.type[0].text //Invoice
             }
-            var _tranid = _result.values.tranid //AZ10000016 document ID
+            var _tranid = result.tranid //AZ10000016 document ID
 
             var _entity_value = '' //529
             var _entity_text = '' //11 se06_company公司
-            if (_result.values.entity.length != 0) {
-              _entity_value = _result.values.entity[0].value //529
-              _entity_text = _result.values.entity[0].text //11 se06_company公司
+            if (result.entity.length != 0) {
+              _entity_value = result.entity[0].value //529
+              _entity_text = result.entity[0].text //11 se06_company公司
             }
 
-            var _amount = stringutility.convertToFloat(_result.values.amount)
+            var _amount = stringutility.convertToFloat(result.amount)
 			//20210707 walter modify
-			if (stringutility.convertToFloat(_result.values.quantity) <0) _amount = -1*_amount
+			if (stringutility.convertToFloat(result.quantity) <0) _amount = -1*_amount
 			
-            var _linesequencenumber = _result.values.linesequencenumber //1
+            var _linesequencenumber = result.linesequencenumber //1
             //var _line                  = _result.values.line;			    //1
 
-            var _memo = _result.values['memo'] //雅結~~
+            var _memo = result.memo //雅結~~
             //var _item_salesdescription = _result.values['item.salesdescription']
 			var _prodcut_id = ''
 			var _prodcut_text = ''
-			if (_result.values.item.length != 0) {
-				_prodcut_id = _result.values.item[0].value //10519
-				_prodcut_text = _result.values.item[0].text //NI20200811000099
+			if (result.item.length != 0) {
+				_prodcut_id = result.item[0].value //10519
+				_prodcut_text = result.item[0].text //NI20200811000099
 			}
-            var _item_displayname = _result.values[_ns_item_name_field] //新客戶折扣
+            var _item_displayname = result[_ns_item_name_field] //新客戶折扣
             if (_ns_item_name_field=='item.displayname') {
             	_item_displayname = _prodcut_text+_item_displayname
             }
             //if (stringutility.trim(_memo) != '') _item_displayname = _memo
 
             var _item_salestaxcode_value = '' //5
-            var _item_salestaxcode_text = _result.values['taxItem.itemid'] //UNDEF-TW
+            var _item_salestaxcode_text = result.taxCode //UNDEF-TW
 
             var _tax_type = '1' //default 應稅
-            if (_result.values['taxItem.internalid'].length != 0) {
-              _item_salestaxcode_value =
-                _result.values['taxItem.internalid'][0].value //5
-              var _taxObj = getTaxInformation(_item_salestaxcode_value)
+            if (result.taxCode.length != 0) {
+              _item_salestaxcode_value = result.taxCode[0].value //5
+              // var _taxObj = getTaxInformation(_item_salestaxcode_value)
+              var _taxObj = taxType21.getTaxTypeByTaxCode(_item_salestaxcode_value)
               if (typeof _taxObj !== 'undefined') {
-                _tax_type = _taxObj.voucher_property_value
+                _tax_type = _taxObj.value
               }
             }
 
             var _item_internalid_value = ''
-            if (_result.values['item.internalid'].length != 0) {
+            if (result.item.length != 0) {
               _item_internalid_value =
-                _result.values['item.internalid'][0].value //115
-              _item_internalid_text = _result.values['item.internalid'][0].text //115
+                  result.item[0].value //115
+              _item_internalid_text = result.item[0].text //115
             }
 
-            var _rate = _result.values.rate //3047.61904762
+            var _rate = result.rate //3047.61904762
             var _department_value = ''
             var _department_text = ''
-            if (_result.values.department.length != 0) {
-              _department_value = _result.values['department'][0].value //1
-              _department_text = _result.values['department'][0].text //業務1部
+            if (result.department.length != 0) {
+              _department_value = result.department[0].value //1
+              _department_text = result.department[0].text //業務1部
             }
 
             var _class_value = ''
             var _class_text = ''
-            if (_result.values['class'].length != 0) {
-              _class_value = _result.values['class'][0].value //1
-              _class_text = _result.values['class'][0].text //業務1部
+            if (result.class.length != 0) {
+              _class_value = result.class[0].value //1
+              _class_text = result.class[0].text //業務1部
             }
 
-            var _quantity = _result.values.quantity
+            var _quantity = result.quantity
             //20210909 walter 預設值設為1
             if (_quantity.trim().length==0)_quantity='1'
             	
-            var _taxItem_rate = _result.values['taxItem.rate'] //5.00%
+            var _taxItem_rate = result.taxRate //5.00%
             _taxItem_rate = _taxItem_rate.replace('%', '')
 
             //var _tax_amount            = (stringutility.convertToFloat(_amount) * stringutility.convertToFloat(_taxItem_rate)/100);
@@ -645,50 +783,66 @@ define([
             //20201110 walter modify
             //NS 的總稅額
             var _ns_total_tax_amount = stringutility.convertToFloat(
-              _result.values.taxtotal
+              result.taxtotal
             ) //稅額總計 -5.00
             //NS 的總金額小計
             var _ns_total_sum_amount = stringutility.convertToFloat(
-              _result.values.total
+              result.total
             ) //金額總計(含稅)
             //NS 的稅額
             var _ns_item_tax_amount = stringutility.convertToFloat(
-              _result.values.taxamount
+              result.taxamount
             ) //稅額總計 -5.00
             //NS 的Item金額小計
-            var _ns_item_total_amount = stringutility.convertToFloat(
-              _result.values.formulacurrency
-            ) //Item金額小計
-			if (stringutility.convertToFloat(_result.values.quantity) <0) _ns_item_total_amount = -1*_ns_item_total_amount
+            // var _ns_item_total_amount = stringutility.convertToFloat(
+            //   result.formulacurrency
+            // )
+            var _ns_item_total_amount =
+                stringutility.convertToFloat(result.amount) + stringutility.convertToFloat(result.taxamount)
+            //Item金額小計
+			if (stringutility.convertToFloat(result.quantity) <0) _ns_item_total_amount = -1*_ns_item_total_amount
             ////////////////////////////////////////////////////////////////////////////////////////////////////
             //單位
-            var _unitabbreviation = _result.values.unitabbreviation
+            var _unitabbreviation = result.unitabbreviation
             ///////////////////////////////////////////////////////////////////////////////////////////////////
             //統編
             //var _customer_vatregnumber = _result.values['customer.vatregnumber'];	//99999997
             var _customer_vatregnumber =
-              _result.values.custbody_gw_tax_id_number //99999997
+              result.custbody_gw_tax_id_number //99999997
             //買方地址 customer.address
-            var _buyer_address = _result.values['customer.address']
+            // var _buyer_address = _result.values['customer.address']
 
-            var _companyObj = getCustomerRecord(_customer_vatregnumber)
+            // var _companyObj = getCustomerRecord(_customer_vatregnumber)
             /**
 			var _email = ''
             if (typeof _companyObj !== 'undefined') {
               _email = _companyObj.email
             }
 			*/
-			var _email = _result.values['customer.email']
+			var _email = result['customer.email']
 			
-            _entity_text = _result.values.custbody_gw_gui_title
-            _buyer_address = _result.values.custbody_gw_gui_address
+            _entity_text = result.custbody_gw_gui_title
+            var _buyer_address = result.custbody_gw_gui_address
 
             ///////////////////////////////////////////////////////////////////////////////////////////////////
             var _random_number = invoiceutility.getRandomNum(1000, 9999)
 			
-            var _gw_gui_main_memo = _result.values.custbody_gw_gui_main_memo //額外備註
-            var _gw_item_memo = _result.values.custcol_gw_item_memo //項目備註
-
+            var _gw_gui_main_memo = result.custbody_gw_gui_main_memo //額外備註
+            var _gw_item_memo = result.custcol_gw_item_memo //項目備註
+            ////////////////////////////////////////////////////////////
+            //20231229 currency 幣別
+            var _currency_value = -1;
+            var _currency_text  = '';
+            if (result.currency.length != 0) {
+          	  _currency_value = result.currency[0].value //2
+          	  _currency_text  = result.currency[0].text  //USD
+            }
+            //20231229 exchangerate 匯率
+            var _exchangerate = result['Currency.exchangerate']
+            if (_currency_text == 'USD') {
+            	_gw_item_memo += 'Price: '+_exchangerate
+            }  
+            ////////////////////////////////////////////////////////////
             ////////////////////////////////////////////////////////////
             //處理零稅率資訊
             //海關出口單類別
@@ -711,52 +865,53 @@ define([
             //輸出或結匯日期
             var _gw_customs_export_date = ''
             if (
-              _result.values.custbody_gw_customs_export_category.length != 0
+                result.custbody_gw_customs_export_category.length != 0
             ) {
               //海關出口單類別
               _gw_customs_export_category_value =
-                _result.values.custbody_gw_customs_export_category[0].value //3
+                  result.custbody_gw_customs_export_category[0].value //3
               _gw_customs_export_category_text =
-                _result.values.custbody_gw_customs_export_category[0].text //D1-課稅區售與或退回保稅倉
+                  result.custbody_gw_customs_export_category[0].text //D1-課稅區售與或退回保稅倉
               var _temp_ary = _gw_customs_export_category_text.split('-')
               _gw_customs_export_category_text = _temp_ary[0].substr(0, 2)
             }
-            if (_result.values.custbody_gw_applicable_zero_tax.length != 0) {
+            if (result.custbody_gw_applicable_zero_tax.length != 0) {
               //適用零稅率規定
               _gw_applicable_zero_tax_value =
-                _result.values.custbody_gw_applicable_zero_tax[0].value //5
+                  result.custbody_gw_applicable_zero_tax[0].value //5
               _gw_applicable_zero_tax_text =
-                _result.values.custbody_gw_applicable_zero_tax[0].text //5-國際間之運輸
+                  result.custbody_gw_applicable_zero_tax[0].text //5-國際間之運輸
               var _temp_ary = _gw_applicable_zero_tax_text.split('-')
               _gw_applicable_zero_tax_text = _temp_ary[0].substr(0, 1)
             }
-            if (_result.values.custbody_gw_egui_clearance_mark.length != 0) {
+            if (result.custbody_gw_egui_clearance_mark.length != 0) {
               //通關註記
               _gw_egui_clearance_mark_value =
-                _result.values.custbody_gw_egui_clearance_mark[0].value //1
+                  result.custbody_gw_egui_clearance_mark[0].value //1
               _gw_egui_clearance_mark_text =
-                _result.values.custbody_gw_egui_clearance_mark[0].text //1-經海關
+                  result.custbody_gw_egui_clearance_mark[0].text //1-經海關
               var _temp_ary = _gw_egui_clearance_mark_text.split('-')
               _gw_egui_clearance_mark_text = _temp_ary[0].substr(0, 1)
             }
             //海關出口號碼 : AA123456789012
-            _gw_customs_export_no = _result.values.custbody_gw_customs_export_no
+            _gw_customs_export_no = result.custbody_gw_customs_export_no
             //輸出或結匯日期 : 2021/01/22
-            _gw_customs_export_date = convertExportDate(
-              _result.values.custbody_gw_customs_export_date
-            )
+            if(_gw_customs_export_date) {
+              _gw_customs_export_date =
+                  convertExportDate(gwDateUtil.getDateWithFormat(result.custbody_gw_customs_export_date, _userDateFormat, 'MM/DD/YYYY'))
+            }
             log.debug('_gw_customs_export_date', _gw_customs_export_date)
             ///////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////////////////////////////////////
             //載具類別
             var _gw_gui_carrier_type = ''
-            if (_result.values.custbody_gw_gui_carrier_type !=null && _result.values.custbody_gw_gui_carrier_type.length != 0) {
-		        _gw_gui_carrier_type = getCarryTypeValue(_result.values.custbody_gw_gui_carrier_type[0].value)  
+            if (result.custbody_gw_gui_carrier_type !=null && result.custbody_gw_gui_carrier_type.length != 0) {
+		        _gw_gui_carrier_type = getCarryTypeValue(result.custbody_gw_gui_carrier_type[0].value)
 	        } 
-			var _gw_gui_carrier_id_1 = _result.values.custbody_gw_gui_carrier_id_1
-			var _gw_gui_carrier_id_2 = _result.values.custbody_gw_gui_carrier_id_2
+			var _gw_gui_carrier_id_1 = result.custbody_gw_gui_carrier_id_1
+			var _gw_gui_carrier_id_2 = result.custbody_gw_gui_carrier_id_2
 			//捐贈代碼
-			var _gw_gui_donation_code = _result.values.custbody_gw_gui_donation_code
+			var _gw_gui_donation_code = result.custbody_gw_gui_donation_code
 
             //取得資料-END
             ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -980,11 +1135,11 @@ define([
             )
           } //End IF InvtPart or Discount
 
-          if (_mainline == '*' && _result.values.createdfrom.length != 0) {
-            _sales_order_id = _result.values.createdfrom[0].value //633
+          if (_mainline == '*' && _result.createdfrom.length != 0) {
+            _sales_order_id = result.createdfrom[0].value //633
           }
 
-          return true
+          // return true
         })
 
         if (_existFlag === true) {
@@ -1013,7 +1168,7 @@ define([
           var _cloneMainJsonObj = JSON.parse(JSON.stringify(_mainJsonObj))
           _jsonObjAry.push(_cloneMainJsonObj)
         }
-      }
+      // }
 
       log.debug('整理完 INvoice JsonObjAry', JSON.stringify(_jsonObjAry))
     } catch (e) {
@@ -1558,10 +1713,11 @@ define([
           var _tax_code = _itemObj.taxCode
           var _tax_rate = _itemObj.taxRate //5.00
           //var _tax_type = gwconfigure.getGwTaxTypeFromNSTaxCode(stringutility.trim(_tax_code));
-          var _taxObj = getTaxInformation(_tax_code)
+          // var _taxObj = getTaxInformation(_tax_code)
+          var _taxObj = taxType21.getTaxTypeByTaxCode(_tax_code)
           var _tax_type = '1'
           if (typeof _taxObj !== 'undefined') {
-            _tax_type = _taxObj.voucher_property_value
+            _tax_type = _taxObj.valueOf()
           }
 
           //金額要重算
@@ -1804,29 +1960,29 @@ define([
     try {
       //var _documentDate = getCompanyLocatDate();
       //var _documentTime = getCompanyLocatTime()
-	  var _documentTime = dateutility.getCompanyLocatTime();
+      log.debug({title: 'dateutility.getCompanyLocatTime()', details: dateutility.getCompanyLocatTime()})
+	  var _documentTime = gwDateUtil.getCurrentDateTime().time
       //var _year_month   = getTaxYearMonth();
 
       var trandate = jsonObj.trandate
-      //處理年月 2020/10/13
-      var _formattedDate = format.format({
-        value: trandate,
-        type: format.Type.DATETIME,
-        timezone: format.Timezone.ASIA_TAIPEI,
-      })
-      var _documentDate = dateutility.getConvertDateByDate(trandate)
-      var _year_month = dateutility.getTaxYearMonthByDate(trandate) //10910
-      //var _documentDate = dateutility.getConvertDateByDateObj(_formattedDate);  //20201005
+      log.debug({title: 'trandate', details: trandate})
+      var convertedDate = gwDateUtil.getDateWithFormat(trandate, _userDateFormat, 'MM/DD/YYYY')
+      log.debug({title: 'convertedDate', details: convertedDate})
+      var _documentDate = dateutility.getConvertDateByDate(convertedDate)
+      var _year_month = dateutility.getTaxYearMonthByDate(convertedDate) //10910
       var _applyPeriod = getApplyPeriodOptions(_year_month)
-      log.debug(
-        '_documentDate',
-        '_documentDate=' +
-          _documentDate +
-          ' documentTime:' +
-          _documentTime +
-          ' ,year_month=' +
-          _year_month
-      )
+      log.debug({
+        title: 'saveMainAndDeatilVoucher',
+        details: {
+          _documentTime,
+          trandate,
+          convertedDate,
+          _documentDate,
+          _year_month,
+          _applyPeriod
+        }
+      })
+
 log.debug('檢查 jsonObj',  JSON.stringify(jsonObj))
       //_documentDate='20200911';_documentTime='23:59:59';_year_month='10910';
       var _net_value = 1
@@ -1867,20 +2023,20 @@ log.debug('檢查 jsonObj',  JSON.stringify(jsonObj))
       //default format code
       var _voucherFormatCode = _invoceFormatCode
       if (voucher_type === 'EGUI' && _tax_diff_error == false) {
-        var eGUIConfig = gwDaoEguiConfig.getSetting()
         //發票號碼 apply_dept_code, apply_class
         //_documentNumber = invoiceutility.getAssignLogNumber(invoice_type, jsonObj.sellerIdentifier, stringutility.trim(jsonObj.department), stringutility.trim(jsonObj.classId), _year_month, need_upload_mig, _documentDate);
         var _assignlog_dept_code = apply_dept_code
         var _assignlog_class_code = apply_class 
           
-        _assignlog_dept_code = (stringutility.trim(apply_dept_code) == 'USE_INVOICE' && eGUIConfig.isEGUIDepartment)
-            ? stringutility.trim(jsonObj.department) : ''
-        _assignlog_class_code = (stringutility.trim(apply_dept_code) == 'USE_INVOICE' && eGUIConfig.isEGUIDepartment)
-            ? stringutility.trim(jsonObj.classId) : ''
-        log.debug({
-          title: '_assignlog_dept_code | _assignlog_class_code',
-          details: `${_assignlog_dept_code} | ${_assignlog_class_code}`
-        })
+        if (stringutility.trim(apply_dept_code) == 'USE_INVOICE') {
+          //以單據為主 = USE_INVOICE
+          _assignlog_dept_code = stringutility.trim(jsonObj.department)         
+        }
+        if (stringutility.trim(apply_class) == 'USE_INVOICE') {
+          //以單據為主 = USE_INVOICE
+          _assignlog_class_code = stringutility.trim(jsonObj.classId)          
+        }
+         
         if (need_upload_mig != 'ALL' && voucher_type != need_upload_mig) {
          /**
           _documentNumber = invoiceutility.getAssignLogNumber(
@@ -1976,6 +2132,18 @@ log.debug('檢查 jsonObj',  JSON.stringify(jsonObj))
         fieldId: 'custrecord_gw_voucher_type',
         value: voucher_type,
       })
+      //20230324
+      if (voucher_type=='EGUI'){
+    	  _voucherMainRecord.setValue({
+	        fieldId: 'custrecord_gw_dm_mig_type',
+	        value: _egui_gw_dm_mig_type,
+	      })
+      }else{
+    	  _voucherMainRecord.setValue({
+  	        fieldId: 'custrecord_gw_dm_mig_type',
+  	        value: _allowance_gw_dm_mig_type,
+  	      })
+      }
       _voucherMainRecord.setValue({
         fieldId: 'custrecord_gw_voucher_number',
         value: _documentNumber,
@@ -2927,11 +3095,89 @@ log.debug('檢查 jsonObj',  JSON.stringify(jsonObj))
 	 var _day   = parseInt(date_str.substring(6, 8))
 	    
 	 return new Date(_year,_month,_day) 
-  }	
+  }
 
   //處理發票資料-END
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  function getSearchCreditMemoFilters(internalIdAry) {
+    var searchFilters = []
+    searchFilters.push(['type', 'anyof', 'CustCred'])
+    searchFilters.push('AND')
+    searchFilters.push(['taxline', 'is', 'F'])
+    searchFilters.push('AND')
+    searchFilters.push(['cogs', 'is', 'F'])
+    searchFilters.push('AND')
+    searchFilters.push(['shipping', 'is', 'F'])
+    searchFilters.push('AND')
+    searchFilters.push([
+      [
+        ['mainline', 'is', 'T']
+      ],
+      'OR',
+      [
+        ['mainline', 'is', 'F'],
+        'AND',
+        ['item', 'noneof', '@NONE@']
+      ]
+    ])
+
+    if (internalIdAry.length) {
+      log.debug({title: 'getSearchCreditMemoFilters - internalIdAry', details: internalIdAry})
+      searchFilters.push('AND')
+      searchFilters.push(['createdfrom', 'anyof', internalIdAry])
+    }
+    searchFilters.push('AND')
+    searchFilters.push(['CUSTBODY_GW_EVIDENCE_ISSUE_STATUS.custrecord_gw_evidence_status_value', 'is', _manual_evidence_status_value])
+    searchFilters.push('AND')
+    searchFilters.push(['custbody_gw_gui_num_start', 'isempty', ''])
+    searchFilters.push('AND')
+    searchFilters.push(['custbody_gw_gui_num_end', 'isempty', ''])
+    searchFilters.push('AND')
+    searchFilters.push(['custbody_gw_allowance_num_start', 'isempty', ''])
+    searchFilters.push('AND')
+    searchFilters.push(['custbody_gw_allowance_num_end', 'isempty', ''])
+    searchFilters.push('AND')
+    searchFilters.push(['custbody_gw_gui_title', 'isnotempty', ''])
+    searchFilters.push('AND')
+    searchFilters.push(['custbody_gw_tax_id_number', 'isnotempty', ''])
+
+    return searchFilters;
+  }
+
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  function getCreditMemoDetailsById(internalIdAry) {
+    log.debug({title: 'getCreditMemoDetailsById - start ...', details: ''});
+    var searchFilters = getSearchCreditMemoFilters(internalIdAry)
+    var searchColumns = getSearchColumns()
+    var searchSetting = getSearchSetting()
+    var creditMemoSearchObj = search.create({
+      type: gwTransactionFields.recordId,
+      filters: searchFilters,
+      columns: searchColumns,
+      settings: searchSetting
+    });
+    var searchResultCount = creditMemoSearchObj.runPaged().count;
+    log.debug({title: 'getCreditMemoDetailsById - creditMemoSearchObj result count', details: searchResultCount});
+    var searchResultArray = []
+
+    var searchObj = creditMemoSearchObj.runPaged({
+      pageSize: 1000
+    });
+    log.debug({title: 'getCreditMemoDetailsById - searchObj', details: searchObj})
+
+    searchObj.pageRanges.forEach(function (pageRange) {
+      searchObj.fetch({index: pageRange.index}).data.forEach(function (result) {
+        //Process each search result here
+        log.debug({title: 'getCreditMemoDetailsById - result', details: result})
+        searchResultArray.push(JSON.parse(JSON.stringify(result)))
+      });
+    });
+
+    log.debug({title: 'getCreditMemoDetailsById - searchResultArray', details: searchResultArray})
+    log.debug({title: 'getCreditMemoDetailsById - end ...', details: ''});
+    return searchResultArray
+  }
+
   //處理折讓單資料-START
   function getVoucherCreditMemoMainAndDetails(
     mig_type,
@@ -2946,6 +3192,10 @@ log.debug('檢查 jsonObj',  JSON.stringify(jsonObj))
       var _ban = companyInfo.tax_id_number
       var _legalname = companyInfo.be_gui_title
       ////////////////////////////////////////////////////////////
+
+      const creditMemoSearchResultArray = getCreditMemoDetailsById(internalIdAry)
+      const creditMemoDetailsArrayObject = composeResultObject(creditMemoSearchResultArray)
+/**
       //this search is ordered by id, taxrate
       var _mySearch = search.load({
         id: _gw_creditmemo_detail_search_id,
@@ -2956,7 +3206,7 @@ log.debug('檢查 jsonObj',  JSON.stringify(jsonObj))
       _filterArray.push('and')
       _filterArray.push(['CUSTBODY_GW_EVIDENCE_ISSUE_STATUS.custrecord_gw_evidence_status_value', search.Operator.IS, _manual_evidence_status_value])
   
-      if (internalIdAry != null) {
+      // if (internalIdAry != null) {
         _filterArray.push('and')
         //_filterArray.push(['createdfrom',search.Operator.ANYOF, internalIdAry]);
         _filterArray.push(['createdfrom', 'anyof', internalIdAry])
@@ -2984,7 +3234,7 @@ log.debug('檢查 jsonObj',  JSON.stringify(jsonObj))
         ////////////////////////////////////////////////////////////////
         _mySearch.filterExpression = _filterArray
         log.debug('_filterArray', JSON.stringify(_filterArray))
-
+**/
         var _checkID = ''
         var _mainJsonObj
         var _discountItemJsonObj
@@ -3016,66 +3266,67 @@ log.debug('檢查 jsonObj',  JSON.stringify(jsonObj))
         var _tax9_item_amount = 0
 
         var _existFlag = false
-        _mySearch.run().each(function (result) {
-          var _result = JSON.parse(JSON.stringify(result))
+        creditMemoDetailsArrayObject.forEach(function (result) {
+        // _mySearch.run().each(function (result) {
+          // var _result = JSON.parse(JSON.stringify(result))
           log.debug('Credit Memo Detail Search Result', JSON.stringify(result))
           //1.Main Information
-          var _id = _result.id //840
-          var _itemtype = _result.values.itemtype //InvtPart+Discount
+          var _id = result.id //840
+          var _itemtype = result.itemtype //InvtPart+Discount
 
           if (stringutility.trim(_itemtype) != '') {
             _existFlag = true
             ///////////////////////////////////////////////////////////////////////////////////////////
             //取得資料-START
-            var _account_value = '' //54
-            var _account_text = '' //4000 Sales
-            if (_result.values.account.length != 0) {
-              _account_value = _result.values.account[0].value //54
-              _account_text = _result.values.account[0].text //4000 Sales
-            }
+            // var _account_value = '' //54
+            // var _account_text = '' //4000 Sales
+            // if (result.account.length != 0) {
+            //   _account_value = result.account[0].value //54
+            //   _account_text = result.account[0].text //4000 Sales
+            // }
 
-            var _trandate = _result.values.trandate //2020-07-06
-            var _postingperiod_value = '' //111
-            var _postingperiod_text = '' //Jul 2020
-            if (_result.values.postingperiod.length != 0) {
-              _postingperiod_value = _result.values.postingperiod[0].value //111
-              _postingperiod_text = _result.values.postingperiod[0].text //Jul 2020
-            }
-            var _taxperiod_value = '' //111;
-            var _taxperiod_text = '' //Jul 2020;
-            if (_result.values.taxperiod.length != 0) {
-              _taxperiod_value = _result.values.taxperiod[0].value //111;
-              _taxperiod_text = _result.values.taxperiod[0].text //Jul 2020;
-            }
+            var _trandate = result.trandate //2020-07-06
+            // var _postingperiod_value = '' //111
+            // var _postingperiod_text = '' //Jul 2020
+            // if (result.postingperiod.length != 0) {
+            //   _postingperiod_value = result.postingperiod[0].value //111
+            //   _postingperiod_text = result.postingperiod[0].text //Jul 2020
+            // }
+            // var _taxperiod_value = '' //111;
+            // var _taxperiod_text = '' //Jul 2020;
+            // if (result.taxperiod.length != 0) {
+            //   _taxperiod_value = result.taxperiod[0].value //111;
+            //   _taxperiod_text = result.taxperiod[0].text //Jul 2020;
+            // }
 
-            var _type_value = '' //CustInvc
-            var _type_text = '' //Invoice
-            if (_result.values.type.length != 0) {
-              _type_value = _result.values.type[0].value //CustInvc
-              _type_text = _result.values.type[0].text //Invoice
-            }
-            var _tranid = _result.values.tranid //AZ10000016 documeny ID
+            // var _type_value = '' //CustInvc
+            // var _type_text = '' //Invoice
+            // if (result.type.length != 0) {
+            //   _type_value = result.type[0].value //CustInvc
+            //   _type_text = result.type[0].text //Invoice
+            // }
+            var _tranid = result.tranid //AZ10000016 documeny ID
 
             var _entity_value = '' //529
             var _entity_text = '' //11 se06_company公司
-            if (_result.values.entity.length != 0) {
-              _entity_value = _result.values.entity[0].value //529
-              _entity_text = _result.values.entity[0].text //11 se06_company公司
+            if (result.entity.length != 0) {
+              _entity_value = result.entity[0].value //529
+              _entity_text = result.entity[0].text //11 se06_company公司
             }
 
-            var _amount = stringutility.convertToFloat(_result.values.amount)
-            var _linesequencenumber = _result.values.linesequencenumber //1
+            var _amount = stringutility.convertToFloat(result.amount)
+            var _linesequencenumber = result.linesequencenumber //1
             //var _line                  = _result.values.line;			    //1
 
-            var _memo = _result.values['memo'] //雅結~~
+            var _memo = result.memo //雅結~~
             //var _item_salesdescription = _result.values['item.salesdescription']
             var _prodcut_id = ''
 			var _prodcut_text = ''
-			if (_result.values.item.length != 0) {
-				_prodcut_id = _result.values.item[0].value //10519
-				_prodcut_text = _result.values.item[0].text //NI20200811000099
+			if (result.item.length != 0) {
+				_prodcut_id = result.item[0].value //10519
+				_prodcut_text = result.item[0].text //NI20200811000099
 			}
-            var _item_displayname = _result.values[_ns_item_name_field] //新客戶折扣
+            var _item_displayname = result[_ns_item_name_field] //新客戶折扣
             if (_ns_item_name_field=='item.displayname') {
             	_item_displayname = _prodcut_text+_item_displayname
             }
@@ -3083,49 +3334,50 @@ log.debug('檢查 jsonObj',  JSON.stringify(jsonObj))
             //if (stringutility.trim(_memo) != '') _item_displayname = _memo
 
             var _item_salestaxcode_value = '' //5
-            var _item_salestaxcode_text = _result.values['taxItem.itemid'] //UNDEF-TW
+            var _item_salestaxcode_text = result.taxCode[0].value //UNDEF-TW
 
             var _tax_type = ''
-            if (_result.values['taxItem.internalid'].length != 0) {
+            if ( result.taxCode.length != 0) {
               _item_salestaxcode_value =
-                _result.values['taxItem.internalid'][0].value //5
+                  result.taxCode[0].value //5
               //_item_salestaxcode_text  = _result.values['taxItem.internalid'][0].text;  //UNDEF-TW
               //_tax_type = gwconfigure.getGwTaxTypeFromNSTaxCode(_item_salestaxcode_value);
-              var _taxObj = getTaxInformation(_item_salestaxcode_value)
+              // var _taxObj = getTaxInformation(_item_salestaxcode_value)
+              var _taxObj = taxType21.getTaxTypeByTaxCode(_item_salestaxcode_value)
               if (typeof _taxObj !== 'undefined') {
-                _tax_type = _taxObj.voucher_property_value
+                _tax_type = _taxObj.value
               }
             }
 
             var _item_internalid_value = ''
-            if (_result.values['item.internalid'].length != 0) {
+            if (result.item.length != 0) {
               _item_internalid_value =
-                _result.values['item.internalid'][0].value //115
-              _item_internalid_text = _result.values['item.internalid'][0].text //115
+                  result.item[0].value //115
+              _item_internalid_text = result.item[0].text //115
             }
 
             //var _rate                  = _result.values.rate; //3047.61904762
-            var _rate = _result.values.fxrate //3047.61904762
+            var _rate = result.rate //3047.61904762
 
             var _department_value = ''
             var _department_text = ''
-            if (_result.values.department.length != 0) {
-              _department_value = _result.values['department'][0].value //1
-              _department_text = _result.values['department'][0].text //業務1部
+            if (result.department.length != 0) {
+              _department_value = result.department[0].value //1
+              _department_text = result.department[0].text //業務1部
             }
 
             var _class_value = ''
             var _class_text = ''
-            if (_result.values.class.length != 0) {
-              _class_value = _result.values['class'][0].value //1
-              _class_text = _result.values['class'][0].text //業務1部
+            if (result.class.length != 0) {
+              _class_value = result.class[0].value //1
+              _class_text = result.class[0].text //業務1部
             }
 
-            var _quantity = _result.values.quantity
+            var _quantity = result.quantity
             //20210909 walter 預設值設為1
             if (_quantity.trim().length==0)_quantity='1'
 
-            var _taxItem_rate = _result.values['taxItem.rate'] //5.00%
+            var _taxItem_rate = result.taxRate //5.00%
 
             _taxItem_rate = _taxItem_rate.replace('%', '')
             //var _tax_amount            = (stringutility.convertToFloat(_amount) * stringutility.convertToFloat(_taxItem_rate)/100);
@@ -3135,53 +3387,57 @@ log.debug('檢查 jsonObj',  JSON.stringify(jsonObj))
             //20201110 walter modify
             //NS 的總稅額
             var _ns_total_tax_amount = stringutility.convertToFloat(
-              _result.values.taxtotal
+                result.taxtotal
             ) //稅額總計 -5.00
             //NS 的總金額小計
             var _ns_total_sum_amount = stringutility.convertToFloat(
-              _result.values.total
+                result.total
             ) //金額總計(含稅)
             //NS 的稅額
             var _ns_item_tax_amount = stringutility.convertToFloat(
-              _result.values.taxamount
+                result.taxamount
             ) //稅額總計 -5.00
             //NS 的Item金額小計
-            var _ns_item_total_amount = stringutility.convertToFloat(
-              _result.values.formulacurrency
-            ) //Item金額小計
+            // var _ns_item_total_amount = stringutility.convertToFloat(
+            //   _result.values.formulacurrency
+            // )
+            var _ns_item_total_amount =
+                stringutility.convertToFloat(result.amount) + stringutility.convertToFloat(result.taxamount)
+            //Item金額小計
             ////////////////////////////////////////////////////////////////////////////////////////////////////
-
             //單位
-            var _unitabbreviation = _result.values.unitabbreviation
+            var _unitabbreviation = result.unitabbreviation
+            //////////////////////////////////////////////////////////////////////////////////////////////////
+            var _item_remark = result.custcol_gw_item_memo
+            //20231229 currency 幣別
+            var _currency_value = -1;
+            var _currency_text  = '';
+            if (_result.currency.length != 0) {
+           	  _currency_value = _result.currency[0].value //2
+           	  _currency_text  = _result.currency[0].text  //USD
+            }
+            //20231229 exchangerate 匯率
+            var _exchangerate = _result['Currency.exchangerate']
+            if (_currency_text == 'USD') {
+             	_item_remark += 'Price: '+_exchangerate
+            }  
             //////////////////////////////////////////////////////////////////////////////////////////////////
             //統編
             //var _customer_vatregnumber = _result.values['customer.vatregnumber'];	//99999997
-            var _customer_vatregnumber =
-              _result.values.custbody_gw_tax_id_number //99999997
+            var _customer_vatregnumber = result.custbody_gw_tax_id_number //99999997
             //買方地址 customer.address
-            var _buyer_address = _result.values['customer.address']
-            var _companyObj = getCustomerRecord(_customer_vatregnumber)
-            //_buyer_address  = _companyObj.address;
-            //_entity_text    = _companyObj.companyname;
-            /**
-		    var _email = ''
-            if (typeof _companyObj !== 'undefined') {
-              _email = _companyObj.email
-            }
-            */
-            var _email = _result.values['customer.email']
-			
-            _entity_text = _result.values.custbody_gw_gui_title
-            _buyer_address = _result.values.custbody_gw_gui_address
+            var _email = result['customer.email']
+            _entity_text = result.custbody_gw_gui_title
+            var _buyer_address = result.custbody_gw_gui_address
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
             var _random_number = invoiceutility.getRandomNum(1000, 9999)
              
             var _createdfrom_value = ''
             var _createdfrom_text = ''
-            if (_result.values['createdfrom'].length != 0) {
-              _createdfrom_value = _result.values['createdfrom'][0].value //948
-              _createdfrom_text = _result.values['createdfrom'][0].text //Invoice #AZ10000019
+            if (result.createdfrom.length != 0) {
+              _createdfrom_value = result.createdfrom[0].value //948
+              _createdfrom_text = result.createdfrom[0].text //Invoice #AZ10000019
             }
             ////////////////////////////////////////////////////////////
             //處理零稅率資訊
@@ -3205,51 +3461,52 @@ log.debug('檢查 jsonObj',  JSON.stringify(jsonObj))
             //輸出或結匯日期
             var _gw_customs_export_date = ''
             if (
-              _result.values.custbody_gw_customs_export_category.length != 0
+                result.custbody_gw_customs_export_category.length != 0
             ) {
               //海關出口單類別
               _gw_customs_export_category_value =
-                _result.values.custbody_gw_customs_export_category[0].value //3
+                  result.custbody_gw_customs_export_category[0].value //3
               _gw_customs_export_category_text =
-                _result.values.custbody_gw_customs_export_category[0].text //D1-課稅區售與或退回保稅倉
+                  result.custbody_gw_customs_export_category[0].text //D1-課稅區售與或退回保稅倉
               var _temp_ary = _gw_customs_export_category_text.split('-')
               _gw_customs_export_category_text = _temp_ary[0].substr(0, 2)
             }
-            if (_result.values.custbody_gw_applicable_zero_tax.length != 0) {
+            if (result.custbody_gw_applicable_zero_tax.length != 0) {
               //適用零稅率規定
               _gw_applicable_zero_tax_value =
-                _result.values.custbody_gw_applicable_zero_tax[0].value //5
+                  result.custbody_gw_applicable_zero_tax[0].value //5
               _gw_applicable_zero_tax_text =
-                _result.values.custbody_gw_applicable_zero_tax[0].text //5-國際間之運輸
+                  result.custbody_gw_applicable_zero_tax[0].text //5-國際間之運輸
               var _temp_ary = _gw_applicable_zero_tax_text.split('-')
               _gw_applicable_zero_tax_text = _temp_ary[0].substr(0, 1)
             }
-            if (_result.values.custbody_gw_egui_clearance_mark.length != 0) {
+            if (result.custbody_gw_egui_clearance_mark.length != 0) {
               //通關註記
               _gw_egui_clearance_mark_value =
-                _result.values.custbody_gw_egui_clearance_mark[0].value //5
+                  result.custbody_gw_egui_clearance_mark[0].value //5
               _gw_egui_clearance_mark_text =
-                _result.values.custbody_gw_egui_clearance_mark[0].text //5-國際間之運輸
+                  result.custbody_gw_egui_clearance_mark[0].text //5-國際間之運輸
               var _temp_ary = _gw_egui_clearance_mark_text.split('-')
               _gw_egui_clearance_mark_text = _temp_ary[0].substr(0, 1)
             }
             //海關出口號碼 : AA123456789012
-            _gw_customs_export_no = _result.values.custbody_gw_customs_export_no
+            _gw_customs_export_no = result.custbody_gw_customs_export_no
             //輸出或結匯日期 : 2021/01/22
-            _gw_customs_export_date = convertExportDate(
-              _result.values.custbody_gw_customs_export_date
-            )
+            if(_gw_customs_export_date) {
+              _gw_customs_export_date =
+                  convertExportDate(convertExportDate(gwDateUtil.getDateWithFormat(result.custbody_gw_customs_export_date, _userDateFormat, 'MM/DD/YYYY')))
+            }
             log.debug('_gw_customs_export_date', _gw_customs_export_date)
             /////////////////////////////////////////////////////////////////////////////////////////////////////////
             //載具類別
             var _gw_gui_carrier_type = ''
-            if (_result.values.custbody_gw_gui_carrier_type !=null && _result.values.custbody_gw_gui_carrier_type.length != 0) {
-		        _gw_gui_carrier_type = _result.values.custbody_gw_gui_carrier_type[0].value   
+            if (result.custbody_gw_gui_carrier_type !=null && result.custbody_gw_gui_carrier_type.length != 0) {
+		        _gw_gui_carrier_type = result.custbody_gw_gui_carrier_type[0].value
 	        } 
-			var _gw_gui_carrier_id_1 = _result.values.custbody_gw_gui_carrier_id_1
-			var _gw_gui_carrier_id_2 = _result.values.custbody_gw_gui_carrier_id_2
+			var _gw_gui_carrier_id_1 = result.custbody_gw_gui_carrier_id_1
+			var _gw_gui_carrier_id_2 = result.custbody_gw_gui_carrier_id_2
 			//捐贈代碼
-			var _gw_gui_donation_code = _result.values.custbody_gw_gui_donation_code
+			var _gw_gui_donation_code = result.custbody_gw_gui_donation_code
 		    
             //取得資料-END
             ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3304,7 +3561,7 @@ log.debug('檢查 jsonObj',  JSON.stringify(jsonObj))
               itemTaxAmount: _ns_item_tax_amount,
               itemTotalAmount: _ns_item_total_amount,
               sequenceNumber: _linesequencenumber,
-              itemRemark: '',
+              itemRemark: _item_remark,
               nsDocumentType: 'CREDITMEMO',
               nsDocumentApplyId: _tranid,
               nsDocumentNumber: _tranid,
@@ -3441,7 +3698,7 @@ log.debug('檢查 jsonObj',  JSON.stringify(jsonObj))
             _amountJsonObj.totalAmount = _ns_total_sum_amount
           }
 
-          return true
+          // return true
         })
 
         if (_existFlag === true) {
@@ -3450,7 +3707,7 @@ log.debug('檢查 jsonObj',  JSON.stringify(jsonObj))
           var _cloneMainJsonObj = JSON.parse(JSON.stringify(_mainJsonObj))
           _jsonObjAry.push(_cloneMainJsonObj)
         }
-      }
+      // }
 
       log.debug('parse creditmemo jsonObjAry', JSON.stringify(_jsonObjAry))
     } catch (e) {
@@ -3589,6 +3846,8 @@ log.debug('檢查 jsonObj',  JSON.stringify(jsonObj))
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   function executeScript(context) {
+	//日期格式
+	_userDateFormat = gwpreferences.getDateFormat();
     //removeRecord();return;
     _allowance_pre_code = invoiceutility.getConfigureValue('ALLOWANCE_GROUP', 'ALLOWANCE_PRE_CODE')
     _ns_item_name_field = invoiceutility.getConfigureValue('ITEM_GROUP', 'ITEM_NAME_FIELD')
@@ -3596,6 +3855,9 @@ log.debug('檢查 jsonObj',  JSON.stringify(jsonObj))
     var _tax_diff_balance = stringutility.convertToFloat(
       invoiceutility.getConfigureValue('TAX_GROUP', 'TAX_DIFF_BALANCE')
     )
+    //20230324 預先處理
+    _egui_gw_dm_mig_type = invoiceutility.getVoucherMigType('EGUI')
+    _allowance_gw_dm_mig_type = invoiceutility.getVoucherMigType('ALLOWANCE')
 
     //1.載入公司資料
     loadAllCustomerRecord()
