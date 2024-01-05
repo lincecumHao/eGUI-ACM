@@ -550,12 +550,54 @@ define([
     log.debug({title: 'composeResultObject - resultArray', details: JSON.stringify(resultArray)})
     return resultArray
   }
+  
+  //NE-373
+  function getInvoiceItemName(result) {
+	  var itemName = result.custcol_ntt_iv_itemname;
+	  //第一行: 發票品名+型號
+      //第二行: 客戶PO/客戶料號/等級
+      //等級: 依照客戶客戶主檔設定, 新增[發票是否顯示等級]欄位, 如果此欄位is true則發票品名第二行再帶入等級
+	  var itemModel= "";
+	  if (result['item.custitem_ntt_item_model'].length != 0) {
+		  itemModel = result['item.custitem_ntt_item_model'][0].text;  
+      }	   
+      if (itemModel.length !=0) {
+    	  itemName += ' '+ itemModel;
+      }
+      log.debug('itemName', itemName)      
+      itemName = itemName + "|" + result.otherrefnum ; //客戶PO(otherrefnum)     
+      
+      var customerpartnumber = "";
+      if (result.custcol_scm_customerpartnumber.length != 0) {
+    	  customerpartnumber = result.custcol_scm_customerpartnumber[0].text;  //客戶料號
+      }
+      log.debug('customerpartnumber', customerpartnumber);
+      if (customerpartnumber.length !=0) {
+    	  itemName += ' '+ customerpartnumber;
+      }       
+      var showLevel = result['customer.custentity_ntt_iv_check_show_level'];
+      log.debug('showLevel', showLevel);
+      
+      var itemLevel = "";
+      if (result.custcol_ntt_td_grade.length != 0) {
+    	  itemLevel = result.custcol_ntt_td_grade[0].text;  
+      }
+      log.debug('itemLevel', itemLevel); 
+      
+      if ((showLevel =='T' || showLevel == true) && itemLevel.length !=0) {
+    	  itemName += " "+itemLevel;
+      }
+      
+      log.debug('itemName', itemName);
+      
+      return itemName;
+  }
+  //NE-384
+  function getCreditMemoItemName(result) {
+	  return result.custcol_ntt_iv_itemname; 
+  }
 
-  function getVoucherInvoiceMainAndDetails(
-    mig_type,
-    companyInfo,
-    internalIdAry
-  ) {
+  function getVoucherInvoiceMainAndDetails(mig_type, companyInfo, internalIdAry) {
     var _jsonObjAry = []
 
     try {
@@ -666,10 +708,10 @@ define([
 
         // _mySearch.run().each(function (result) {
         invoiceDetailsArrayObject.forEach(function (result){
-          var _result = JSON.parse(JSON.stringify(result))
+          //var _result = JSON.parse(JSON.stringify(result))
           log.debug('Invoice Detail Search Result', JSON.stringify(result))
           //1.Main Information
-          var _id = _result.id //840
+          var _id = result.id //840
           var _itemtype = result.itemtype //InvtPart or Discount
           var _mainline = result.mainline
 
@@ -729,11 +771,14 @@ define([
 				_prodcut_id = result.item[0].value //10519
 				_prodcut_text = result.item[0].text //NI20200811000099
 			}
+            
+            /**
             var _item_displayname = result[_ns_item_name_field] //新客戶折扣
             if (_ns_item_name_field=='item.displayname') {
             	_item_displayname = _prodcut_text+_item_displayname
             }
-            //if (stringutility.trim(_memo) != '') _item_displayname = _memo
+            */
+            var _item_displayname =  getInvoiceItemName(result);
 
             var _item_salestaxcode_value = '' //5
             var _item_salestaxcode_text = result.taxCode //UNDEF-TW
@@ -1135,7 +1180,7 @@ define([
             )
           } //End IF InvtPart or Discount
 
-          if (_mainline == '*' && _result.createdfrom.length != 0) {
+          if (_mainline == '*' && result.createdfrom.length != 0) {
             _sales_order_id = result.createdfrom[0].value //633
           }
 
@@ -1586,16 +1631,16 @@ define([
 
             var _itemObjAry = []
             for (var a = 0; a < _obj.tax1ItemAry.length; a++) {
-              var _itemObj = _obj.tax1ItemAry[a]
-              _itemObjAry.push(_itemObj)
+                 var _itemObj = _obj.tax1ItemAry[a]
+                 _itemObjAry.push(_itemObj)
             }
             for (var a = 0; a < _obj.tax2ItemAry.length; a++) {
-              var _itemObj = _obj.tax2ItemAry[a]
-              _itemObjAry.push(_itemObj)
+                 var _itemObj = _obj.tax2ItemAry[a]
+                 _itemObjAry.push(_itemObj)
             }
             for (var a = 0; a < _obj.tax3ItemAry.length; a++) {
-              var _itemObj = _obj.tax3ItemAry[a]
-              _itemObjAry.push(_itemObj)
+                 var _itemObj = _obj.tax3ItemAry[a]
+                 _itemObjAry.push(_itemObj)
             }
 
             resetMainObjectTaxInformation(
@@ -1661,14 +1706,12 @@ define([
 
           ///////////////////////////////////////////////////////////////////////////////////
           //Resource 管控
-          var _used_remaining_usage = runtime
-            .getCurrentScript()
-            .getRemainingUsage()
+          var _used_remaining_usage = runtime.getCurrentScript().getRemainingUsage()
           if (open_type == 'SINGLE-EGUIANDALLOWANCE-SCHEDULE') {
             //現開現折
             if (voucher_type == 'EGUI' && _used_remaining_usage <= 5000) break
-            else if (voucher_type != 'EGUI' && _used_remaining_usage <= 100)
-              break
+            else if (voucher_type != 'EGUI' && _used_remaining_usage <= 100)           
+            break
           } else {
             if (_used_remaining_usage <= 100) break
           }
@@ -1783,10 +1826,7 @@ define([
         //找到折讓單對應的Invoice資料
         log.debug('voucher_type', 'voucher_type=' + voucher_type)
         log.debug('historyInvoiceObjAry', JSON.stringify(historyInvoiceObjAry))
-        if (
-          voucher_type === 'ALLOWANCE' &&
-          typeof historyInvoiceObjAry !== 'undefined'
-        ) {
+        if (voucher_type === 'ALLOWANCE' && typeof historyInvoiceObjAry !== 'undefined') {
           for (var i = 0; i < historyInvoiceObjAry.length; i++) {
             var _historyInvoiceObj = historyInvoiceObjAry[i]
             var _historyInvoiceApplyId = _historyInvoiceObj.invoiceApplyId //Invoice ID
@@ -1815,10 +1855,7 @@ define([
               historyInvoiceObjAry[i] = _historyInvoiceObj
 
               _targetInvoiceObj = _historyInvoiceObj
-              log.debug(
-                'creditmemo targetInvoiceObj 2 ',
-                JSON.stringify(_targetInvoiceObj)
-              )
+              log.debug('creditmemo targetInvoiceObj 2 ', JSON.stringify(_targetInvoiceObj))
               break
             }
           }
@@ -1842,7 +1879,7 @@ define([
             apply_user_id
           )
           if (typeof _oneVoucherObj !== 'undefined') {
-            historyInvoiceObjAry.push(_oneVoucherObj)
+              historyInvoiceObjAry.push(_oneVoucherObj)
           }
         } else if (voucher_type == 'ALLOWANCE') {
           _oneVoucherObj = saveMainAndDeatilVoucher(
@@ -1983,7 +2020,7 @@ define([
         }
       })
 
-log.debug('檢查 jsonObj',  JSON.stringify(jsonObj))
+      log.debug('檢查 jsonObj',  JSON.stringify(jsonObj))
       //_documentDate='20200911';_documentTime='23:59:59';_year_month='10910';
       var _net_value = 1
       var _assignLogType = 'TYPE_1'
@@ -2003,10 +2040,7 @@ log.debug('檢查 jsonObj',  JSON.stringify(jsonObj))
 				 _tax_diff_error = invoiceutility.checkTaxDifference(_ns_sales_amount, _ns_tax_rate, _ns_tax_amount, tax_diff_balance);
 			}
          */
-      var _tax_diff_error = checkVoucherTaxDifference(
-        tax_diff_balance,
-        detail_item_ary
-      )
+      var _tax_diff_error = checkVoucherTaxDifference(tax_diff_balance, detail_item_ary)
       log.debug('檢查稅差-1', '_tax_diff_error=' + _tax_diff_error)
       ///////////////////////////////////////////////////////////////////////////////////////////////////////
       var _amountObj = jsonObj.amountObj
@@ -2036,7 +2070,15 @@ log.debug('檢查 jsonObj',  JSON.stringify(jsonObj))
           //以單據為主 = USE_INVOICE
           _assignlog_class_code = stringutility.trim(jsonObj.classId)          
         }
-         
+        
+        log.debug('invoiceutility.getAssignLogNumber',
+                  'need_upload_mig:'+need_upload_mig +
+                  ', voucher_type:'  +voucher_type +
+                  ', need_upload_mig: '+need_upload_mig +
+                  ', buyerIdentifier: '+jsonObj.buyerIdentifier +
+                  ', validate.isValidGUI=' +validate.isValidGUI(jsonObj.buyerIdentifier)
+                 )
+      // need_upload_mig:EGUI, voucher_type:EGUI, need_upload_mig: EGUI, buyerIdentifier: 24549210, validate.isValidGUI=true       
         if (need_upload_mig != 'ALL' && voucher_type != need_upload_mig) {
          /**
           _documentNumber = invoiceutility.getAssignLogNumber(
@@ -2077,6 +2119,14 @@ log.debug('檢查 jsonObj',  JSON.stringify(jsonObj))
           */
        	  if (validate.isValidGUI(jsonObj.buyerIdentifier)==true || 
            	  jsonObj.buyerIdentifier =='0000000000') {	
+       		log.debug('getAssignLogNumberAndCheckDuplicate','invoice_type=' + invoice_type +
+          		  ',jsonObj.sellerIdentifier:'+jsonObj.sellerIdentifier +
+                    ',assignlog_dept_code='+_assignlog_dept_code +
+                    ',assignlog_class_code='+_assignlog_class_code +
+                    ',year_month='+_year_month +
+                    ',need_upload_mig='+need_upload_mig +
+                    ',documentDate='+_documentDate)
+                    
 	          _documentNumber = invoiceutility.getAssignLogNumberAndCheckDuplicate(
 				            -1,
 				            invoice_type,
@@ -2089,27 +2139,17 @@ log.debug('檢查 jsonObj',  JSON.stringify(jsonObj))
 				          )
           }          
         }
-        log.debug(
-          '_documentNumber',
-          '_documentNumber=' +
-            _documentNumber +
-            ' _assignlog_dept_code:' +
-            _assignlog_dept_code +
-            ' ,jsonObj.department=' +
-            jsonObj.department +
-            ' , USE_TYPE=' +
-            apply_dept_code
-        )
+        log.debug('documentNumber','documentNumber=' + _documentNumber +
+        		  ',assignlog_dept_code:'+_assignlog_dept_code +
+                  ',jsonObj.department='+jsonObj.department +
+                  ',USE_TYPE='+apply_dept_code)
       } else {
         //折讓單號碼
-        if (
-          typeof historyInvoiceObj !== 'undefined' &&
-          _tax_diff_error == false
-        ) {
-          _net_value = -1
-          var _today = getCompanyLocatDate()
-          _documentNumber = (invoiceutility.getAllowanceNumber(_allowance_pre_code, stringutility.trim(_today)))
-          _voucherFormatCode = _creditMemoFormatCode
+        if (typeof historyInvoiceObj !== 'undefined' && _tax_diff_error == false) {
+            _net_value = -1
+            var _today = getCompanyLocatDate()
+            _documentNumber = (invoiceutility.getAllowanceNumber(_allowance_pre_code, stringutility.trim(_today)))
+            _voucherFormatCode = _creditMemoFormatCode
         }
         log.debug('檢查-getAllowanceNumber', 'documentNumber=' + _documentNumber)
       } 
@@ -2733,7 +2773,8 @@ log.debug('檢查 jsonObj',  JSON.stringify(jsonObj))
     } catch (e) {
       log.error(e.name, e.message)
     }
-
+    log.debug('saveMainAndDeatilVoucher InvoiceObj', JSON.stringify(_invoiceObj))
+    
     return _invoiceObj
   }
 
@@ -3326,12 +3367,13 @@ log.debug('檢查 jsonObj',  JSON.stringify(jsonObj))
 				_prodcut_id = result.item[0].value //10519
 				_prodcut_text = result.item[0].text //NI20200811000099
 			}
+            /**
             var _item_displayname = result[_ns_item_name_field] //新客戶折扣
             if (_ns_item_name_field=='item.displayname') {
             	_item_displayname = _prodcut_text+_item_displayname
             }
-			 
-            //if (stringutility.trim(_memo) != '') _item_displayname = _memo
+            */
+            var _item_displayname = getCreditMemoItemName(result);
 
             var _item_salestaxcode_value = '' //5
             var _item_salestaxcode_text = result.taxCode[0].value //UNDEF-TW
@@ -3412,12 +3454,12 @@ log.debug('檢查 jsonObj',  JSON.stringify(jsonObj))
             //20231229 currency 幣別
             var _currency_value = -1;
             var _currency_text  = '';
-            if (_result.currency.length != 0) {
-           	  _currency_value = _result.currency[0].value //2
-           	  _currency_text  = _result.currency[0].text  //USD
+            if (result.currency.length != 0) {
+           	  _currency_value = result.currency[0].value //2
+           	  _currency_text  = result.currency[0].text  //USD
             }
             //20231229 exchangerate 匯率
-            var _exchangerate = _result['Currency.exchangerate']
+            var _exchangerate = result['Currency.exchangerate']
             if (_currency_text == 'USD') {
              	_item_remark += 'Price: '+_exchangerate
             }  
@@ -3900,11 +3942,7 @@ log.debug('檢查 jsonObj',  JSON.stringify(jsonObj))
         var _companyInfo = getSellerInfoByBusinessNo(_seller)
         
         //2.1.1. 整理發票資料
-        var _invoiceObjAry = getVoucherInvoiceMainAndDetails(
-          _mig_type,
-          _companyInfo,
-          _invoice_apply_ary
-        )
+        var _invoiceObjAry = getVoucherInvoiceMainAndDetails(_mig_type, _companyInfo, _invoice_apply_ary)
         //2.1.2. 存檔=>Main+Details
         var _historyInvoiceObjAry = []
         _voucher_type = 'EGUI'
