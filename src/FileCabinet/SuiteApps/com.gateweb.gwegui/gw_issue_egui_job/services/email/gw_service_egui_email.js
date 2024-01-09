@@ -66,7 +66,7 @@ define([
 
     send(subject, eguiObj) {
       var eguiObjUpdated = updateEguiObj(eguiObj)
-      var buyerEmail = eguiObjUpdated.buyerEmail || 'se10@gateweb.com.tw'
+      var buyerEmail = eguiObjUpdated.buyerEmail || 'jackielin@gateweb.com.tw'
       var emailContent = this.getEmailBody(eguiObjUpdated)
       return email.send({
         author: eguiObjUpdated.sellerProfile.contactEmployee.value,

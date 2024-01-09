@@ -112,7 +112,7 @@ define([
 
     getRecipients(eguiObj) {
       var recipients = []
-      var recipient = eguiObj.buyerEmail || 'se10@gateweb.com.tw'
+      var recipient = eguiObj.buyerEmail || 'jackielin@gateweb.com.tw'
       recipients.push(recipient)
       return recipients
     }
