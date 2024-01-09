@@ -42,7 +42,7 @@
                 <EmailAddress>${guiData.buyerEmail}</EmailAddress>
             </#if>
         </Buyer>
-        <MainRemark>${guiData.mainRemark}</MainRemark>
+        <MainRemark>${guiData.guiMemo}</MainRemark>
         <#if guiData.clearanceMark == null || guiData.clearanceMark ==''>
             <CustomsClearanceMark>${guiData.clearanceMark}</CustomsClearanceMark>
         </#if>

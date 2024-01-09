@@ -42,8 +42,8 @@
                 <EmailAddress>${guiData.buyerEmail}</EmailAddress>
             </#if>
         </Buyer>
-        <#if guiData.mainRemark != ''>
-            <MainRemark>${guiData.mainRemark}</MainRemark>
+        <#if guiData.guiMemo != ''>
+            <MainRemark>${guiData.guiMemo}</MainRemark>
         </#if>
         <#if guiData.clearanceMark != ''>
             <CustomsClearanceMark>${guiData.clearanceMark}</CustomsClearanceMark>
