@@ -4,6 +4,7 @@ define([
   'N/render',
   'N/email',
   'N/encode',
+  'N/record',
   '../../../library/ramda.min',
   '../../../gw_dao/voucher/gw_dao_voucher',
   '../gw_egui_service',
@@ -14,6 +15,7 @@ define([
   render,
   email,
   encode,
+  record,
   ramda,
   gwVoucherDao,
   eguiService,
@@ -79,7 +81,7 @@ define([
       })
       return htmlRenderer.renderAsString()
     }
-
+    /**
     sendByVoucherId(subject, voucherId) {
       var eguiObj = gwVoucherDao.getGuiByVoucherId(voucherId)
       var eguiObjUpdated = updateEguiObj(eguiObj)
@@ -96,6 +98,45 @@ define([
         emailContentObj.attachments = this.getAttachmentFiles(eguiObjUpdated)
       }
       return this.send(subject, emailContentObj)
+    }
+    */
+    
+    //NE-377 客戶主檔客製欄位紀錄多個email，並確認分隔符號區分
+    sendByVoucherId(subject, voucherId) {
+        var eguiObj = gwVoucherDao.getGuiByVoucherId(voucherId)
+        var eguiObjUpdated = updateEguiObj(eguiObj)
+        var emailContentObj = {
+          author: this.getAuthor(eguiObjUpdated),
+          body: this.getEmailContent(eguiObjUpdated),
+          recipients: this.getMultipleRecipients(eguiObjUpdated),
+          subject: this.getSubject(subject, eguiObjUpdated)
+        }
+
+        log.debug({ title: 'isB2B', details: isB2B(eguiObjUpdated.buyerTaxId) })
+        log.debug({ title: 'buyerTaxId', details: eguiObjUpdated.buyerTaxId })
+        if (isB2B(eguiObjUpdated.buyerTaxId)) {
+          emailContentObj.attachments = this.getAttachmentFiles(eguiObjUpdated)
+        }
+        return this.send(subject, emailContentObj)
+    }
+    
+    //NE-377 客戶主檔客製欄位紀錄多個 email，並確認分隔符號區分
+    getMultipleRecipients(eguiObj) { 
+      var internalid = eguiObj.buyerId
+      log.debug({ title: 'getMultipleRecipients', details: ': internalid: '+internalid })  
+      var customerRecord = record.load({
+		  type: record.Type.CUSTOMER,
+		  id: internalid,
+		  isDynamic: true
+	  })
+		
+	  var email = customerRecord.getValue('email') 
+	  var ntt_multiple_email = customerRecord.getValue('custentity_ntt_multiple_email') 
+      var recipients = ntt_multiple_email || email || 'jackielin@gateweb.com.tw'
+      
+      log.debug({ title: 'recipients', details: recipients })  
+        
+      return recipients.split(',') 
     }
 
     send(subject, emailContentObj) {

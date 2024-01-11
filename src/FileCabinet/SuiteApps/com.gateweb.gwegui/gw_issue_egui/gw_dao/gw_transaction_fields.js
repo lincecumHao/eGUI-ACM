@@ -525,6 +525,13 @@ define(['../../library/ramda.min'], function (ramda) {
             name: 'custentity_ntt_multiple_email',
             join: 'customer',
         },
+        'line.cseg_ntt_sales_type': {
+            id: 'line.cseg_ntt_sales_type',
+            sourceField: 'line.cseg_ntt_sales_type',
+            outputField: 'line.cseg_ntt_sales_type',
+            name: 'line.cseg_ntt_sales_type',
+            join: '',
+        },
         'subsidiary': {
             id: 'subsidiary',
             sourceField: 'subsidiary',
