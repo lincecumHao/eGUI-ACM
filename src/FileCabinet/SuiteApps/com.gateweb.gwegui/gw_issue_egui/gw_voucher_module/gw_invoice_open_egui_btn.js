@@ -50,16 +50,21 @@ define(['N/runtime','N/record','../gw_common_utility/gw_common_invoice_utility']
 			}    		 
     	}
     } 
-   
+    //NE-419
+	var triangularTrade = getTriangularTrade(_current_record)
+	
     log.debug('lock_transaction', 'lock_transaction:' + _lock_transaction)
 	log.debug('auth', 'auth:' + _auth)
 	log.debug('gw_is_issue_egui', 'gw_is_issue_egui:' + _gw_is_issue_egui)
 	log.debug('gw_evidence_status_value', _gw_evidence_status_value)
+	log.debug('triangularTrade', triangularTrade)
+	
     if (
       context.type == context.UserEventType.VIEW &&
 	  _auth == true &&
 	  _gw_evidence_status_value == _manual_evidence_status_value &&
 	  _gw_is_issue_egui == true &&
+	  triangularTrade == false &&
       _lock_transaction == false
     ) {
       frm.addButton({
@@ -71,7 +76,35 @@ define(['N/runtime','N/record','../gw_common_utility/gw_common_invoice_utility']
 
     frm.clientScriptModulePath = './gw_invoice_open_voucher_event.js'
   }
-
+  
+  //NE-419
+  function getTriangularTrade(_record) {	  
+	  var triangularTrade = false
+	  var numLines = _record.getLineCount({sublistId: 'item'})
+	  log.debug('numLines', numLines )
+	  
+	  for(var j=0; j<numLines; j++) { 
+		  var cseg_ntt_sales_type_id = _record.getSublistValue({
+			    sublistId: 'item',
+			    fieldId: 'cseg_ntt_sales_type',
+			    line: j
+		  });
+		  var cseg_ntt_sales_type_text = _record.getSublistText({
+			    sublistId: 'item',
+			    fieldId: 'cseg_ntt_sales_type',
+			    line: j
+		  });
+		  if (cseg_ntt_sales_type_text == '三角貿易') {
+			  triangularTrade = true
+		  }		  
+		  //'line.cseg_ntt_sales_type'  
+		  log.debug('cseg_ntt_sales_type', 'id:'+cseg_ntt_sales_type_id+', text:'+cseg_ntt_sales_type_text )
+	  }
+	  
+	  log.debug('triangularTrade', triangularTrade )
+	  return triangularTrade
+  }
+  
   exports.beforeLoad = beforeLoad
   return exports
 })
