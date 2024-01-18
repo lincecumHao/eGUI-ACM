@@ -10,6 +10,7 @@ define([
   'N/search',
   'N/format',
   '../gw_common_utility/gw_common_string_utility',
+  '../gw_common_utility/gw_common_search_utility',
   '../gw_common_utility/gw_common_invoice_utility',
   '../gw_common_utility/gw_common_configure',
 ], function (
@@ -19,6 +20,7 @@ define([
   search,
   format,
   stringutility,
+  searchutility,
   invoiceutility,
   gwconfigure
 ) {
@@ -64,31 +66,9 @@ define([
   }
   
   ///////////////////////////////////////////////////////////////////////////////////////////
-  function searchInvoice(
-    form,
-    subListObj,
-    subsidiary,
-    customerid,
-    deptcode,
-    classification,
-    employee,
-    tranid,
-    transtartdate,
-    tranenddate,
-    invoice_status
-  ) {
-	  
-	//NE-419  
-	var excludeTranidAry = searchInvoiceTriangularItemTradeList(
-			subsidiary,
-		    customerid,
-		    deptcode,
-		    classification,
-		    employee,
-		    tranid,
-		    transtartdate,
-		    tranenddate,
-		    invoice_status)
+  function searchInvoice(form, subListObj,searchObj) { 
+	//NE-419   
+	var excludeTranidAry = searchInvoiceTriangularItemTradeList(searchObj)
 	     
     var _mySearch = search.load({
       id: _gw_invoice_detail_search_id,
@@ -107,43 +87,43 @@ define([
     _filterArray.push(['CUSTBODY_GW_EVIDENCE_ISSUE_STATUS.custrecord_gw_evidence_status_value', search.Operator.IS, _manual_evidence_status_value])
  
      
-    if (subsidiary != '') {
+    if (searchObj.subsidiary != '') {
 	    _filterArray.push('and')
-	    _filterArray.push(['subsidiary', search.Operator.ANYOF, subsidiary])	    
+	    _filterArray.push(['subsidiary', search.Operator.ANYOF, searchObj.subsidiary])	    
 	}
 
-    if (customerid != '') {
+    if (searchObj.customerid != '') {
         _filterArray.push('and')
-        _filterArray.push(['entity', search.Operator.IS, customerid])
+        _filterArray.push(['entity', search.Operator.IS, searchObj.customerid])
     }
-    if (deptcode != '') {
+    if (searchObj.deptcode != '') {
         _filterArray.push('and')
-        _filterArray.push(['department', search.Operator.IS, deptcode])
+        _filterArray.push(['department', search.Operator.IS, searchObj.deptcode])
     }
-    if (classification != '') {
+    if (searchObj.classification != '') {
         _filterArray.push('and')
-        _filterArray.push(['class', search.Operator.IS, classification])
+        _filterArray.push(['class', search.Operator.IS, searchObj.classification])
     }
-    if (employee != '') {
+    if (searchObj.employee != '') {
         _filterArray.push('and')
-        _filterArray.push(['createdby', search.Operator.IS, employee])
+        _filterArray.push(['createdby', search.Operator.IS, searchObj.employee])
     }
-    if (tranid != '') {
+    if (searchObj.tranid != '') {
         _filterArray.push('and')
-        _filterArray.push(['tranid', search.Operator.IS, tranid])
+        _filterArray.push(['tranid', search.Operator.IS, searchObj.tranid])
     }
-    if (transtartdate != '') {
+    if (searchObj.transtartdate != '') {
         var _formattedDate = format.format({
-            value: transtartdate,
+            value: searchObj.transtartdate,
             type: format.Type.DATETIMETZ,
         })
 
         _filterArray.push('and')
         _filterArray.push(['trandate', search.Operator.ONORAFTER, _formattedDate])
     }
-    if (tranenddate != '') {
+    if (searchObj.tranenddate != '') {
         var _formattedDate = format.format({
-            value: tranenddate,
+            value: searchObj.tranenddate,
             type: format.Type.DATETIMETZ,
         })
         _filterArray.push('and')
@@ -151,10 +131,10 @@ define([
     }
     //////////////////////////////////////////////////////////////////////////
     //20210908 walter add status filter
-    if (invoice_status.length !=0) {    
+    if (searchObj.invoice_status.length !=0) {    
 	    var _status_ary = []
 	    //Invoice 
-	    _status_ary.push(invoice_status)   
+	    _status_ary.push(searchObj.invoice_status)   
 	    _filterArray.push('and')
 	    _filterArray.push(['status', search.Operator.ANYOF, _status_ary])    	      
     }    
@@ -171,21 +151,14 @@ define([
     var i = 0
     var _check_id = -1
     _mySearch.run().each(function (result) {
-      var _result = JSON.parse(JSON.stringify(result))
-      
+      var _result = JSON.parse(JSON.stringify(result))      
       log.debug('invoice _result', JSON.stringify(_result))
-      
-      /**
-      var _item_subsidiary;
-      if (_result.values.subsidiary.length != 0) {
-    	  _item_subsidiary = _result.values.subsidiary[0].value
-      } 
-      */
+         
       var internalid = _result.id
 
       var _invoice_status = ''
       if (_result.values.statusref.length != 0) {
-        _invoice_status = _result.values.statusref[0].value
+          _invoice_status = _result.values.statusref[0].value
       }
 
       //filter voided
@@ -300,23 +273,12 @@ define([
 
     ///////////////////////////////////////////////////////////////////////////////////
   }
+  
   //NE-419
-  function searchInvoiceTriangularItemTradeList( 
-		    subsidiary,
-		    customerid,
-		    deptcode,
-		    classification,
-		    employee,
-		    tranid,
-		    transtartdate,
-		    tranenddate,
-		    invoice_status
-  ) {
+  function searchInvoiceTriangularItemTradeList(searchObj) {
 	     
-    var _mySearch = search.load({
-      id: 'customsearch_gw_inv_triangulartrade_lt',
-    })
-
+    var type = search.Type.INVOICE;
+    
     var _filterArray = []
     _filterArray.push(['line.cseg_ntt_sales_type', 'anyof', '3'])  //三角貿易
      
@@ -329,43 +291,43 @@ define([
     _filterArray.push('and')
     _filterArray.push(['CUSTBODY_GW_EVIDENCE_ISSUE_STATUS.custrecord_gw_evidence_status_value', search.Operator.IS, _manual_evidence_status_value])
       
-    if (subsidiary != '') {
+    if (searchObj.subsidiary != '') {
 	    _filterArray.push('and')
-	    _filterArray.push(['subsidiary', search.Operator.ANYOF, subsidiary])	    
+	    _filterArray.push(['subsidiary', search.Operator.ANYOF, searchObj.subsidiary])	    
 	}
 
-    if (customerid != '') {
+    if (searchObj.customerid != '') {
         _filterArray.push('and')
-        _filterArray.push(['entity', search.Operator.IS, customerid])
+        _filterArray.push(['entity', search.Operator.IS, searchObj.customerid])
     }
-    if (deptcode != '') {
+    if (searchObj.deptcode != '') {
         _filterArray.push('and')
-        _filterArray.push(['department', search.Operator.IS, deptcode])
+        _filterArray.push(['department', search.Operator.IS, searchObj.deptcode])
     }
-    if (classification != '') {
+    if (searchObj.classification != '') {
         _filterArray.push('and')
-        _filterArray.push(['class', search.Operator.IS, classification])
+        _filterArray.push(['class', search.Operator.IS, searchObj.classification])
     }
-    if (employee != '') {
+    if (searchObj.employee != '') {
         _filterArray.push('and')
-        _filterArray.push(['createdby', search.Operator.IS, employee])
+        _filterArray.push(['createdby', search.Operator.IS, searchObj.employee])
     }
-    if (tranid != '') {
+    if (searchObj.tranid != '') {
         _filterArray.push('and')
-        _filterArray.push(['tranid', search.Operator.IS, tranid])
+        _filterArray.push(['tranid', search.Operator.IS, searchObj.tranid])
     }
-    if (transtartdate != '') {
+    if (searchObj.transtartdate != '') {
         var _formattedDate = format.format({
-            value: transtartdate,
+            value: searchObj.transtartdate,
             type: format.Type.DATETIMETZ,
         })
 
         _filterArray.push('and')
         _filterArray.push(['trandate', search.Operator.ONORAFTER, _formattedDate])
     }
-    if (tranenddate != '') {
+    if (searchObj.tranenddate != '') {
         var _formattedDate = format.format({
-            value: tranenddate,
+            value: searchObj.tranenddate,
             type: format.Type.DATETIMETZ,
         })
         _filterArray.push('and')
@@ -373,56 +335,39 @@ define([
     }
     //////////////////////////////////////////////////////////////////////////
     //20210908 walter add status filter
-    if (invoice_status.length !=0) {    
+    if (searchObj.invoice_status.length !=0) {    
 	    var _status_ary = [] 
-	    _status_ary.push(invoice_status)   
+	    _status_ary.push(searchObj.invoice_status)   
 	    _filterArray.push('and')
 	    _filterArray.push(['status', search.Operator.ANYOF, _status_ary])    	      
     }    
-    //////////////////////////////////////////////////////////////////////////
-    
-    _mySearch.filterExpression = _filterArray
+    ///////////////////////////////////////////////////////////////////////////////////     
     log.debug('invoice filterArray', JSON.stringify(_filterArray))
+    var columns = ['mainline','tranid','statusref'];
+    var searchResult = searchutility.getSearchResult(type, _filterArray, columns);    
     ///////////////////////////////////////////////////////////////////////////////////
     //處理結果      
     var idAry = []
-    _mySearch.run().each(function (result) {
-       var _result = JSON.parse(JSON.stringify(result))      
-       log.debug('invoice result', JSON.stringify(_result))
-         
-       var tranid = _result.values.tranid //單號
-       var mainline = _result.values.mainline
-
-       var _invoice_status = ''
-       if (_result.values.statusref.length != 0) {
-           _invoice_status = _result.values.statusref[0].value
-       }
-
-       //filter voided
-       if (mainline != '' && _invoice_status != 'voided') { 
+    searchResult.forEach(function (result) {
+ 	   log.debug('result', JSON.stringify(result))
+ 	   var _internalid = result.id; 
+ 	 
+ 	   var mainline = result.getValue({name: 'mainline'}) 
+ 	   var statusref = result.getValue({name: 'statusref'})
+ 	   var tranid = result.getValue({name: 'tranid'})
+ 	   
+ 	   if (mainline != '' && statusref != 'voided') { 
     	   idAry.push(tranid)
-       }       
-      
-       return true      
-    })     
-    
+       } 
+ 	   
+ 	   return true
+ 	})
+ 	    
     return idAry
     ///////////////////////////////////////////////////////////////////////////////////
   }
  
-  function searchCreateMemo(
-    form,
-    subListObj,
-    subsidiary,
-    customerid,
-    deptcode,
-    classification,
-    employee,
-    tranid,
-    transtartdate,
-    tranenddate,
-    creditmemo_status
-  ) { 
+  function searchCreateMemo(form, subListObj, searchObj) { 
     var _mySearch = search.load({
       id: _gw_creditmemo_detail_search_id,
     })
@@ -438,44 +383,43 @@ define([
     _filterArray.push('and')
     _filterArray.push(['CUSTBODY_GW_EVIDENCE_ISSUE_STATUS.custrecord_gw_evidence_status_value', search.Operator.IS, _manual_evidence_status_value])
   
-    if (subsidiary != '') {
+    if (searchObj.subsidiary != '') {
 	    _filterArray.push('and')
-	    _filterArray.push(['subsidiary', search.Operator.ANYOF, subsidiary])
-	    //_filterArray.push(['custbody_gw_tax_id_number', search.Operator.IS, subsidiary])
+	    _filterArray.push(['subsidiary', search.Operator.ANYOF, searchObj.subsidiary])	     
 	}
     
-    if (customerid != '') {
+    if (searchObj.customerid != '') {
       _filterArray.push('and')
-      _filterArray.push(['entity', 'is', customerid])
+      _filterArray.push(['entity', 'is', searchObj.customerid])
     }
-    if (deptcode != '') {
+    if (searchObj.deptcode != '') {
       _filterArray.push('and')
-      _filterArray.push(['department', 'is', deptcode])
+      _filterArray.push(['department', 'is', searchObj.deptcode])
     }
-    if (classification != '') {
+    if (searchObj.classification != '') {
       _filterArray.push('and')
-      _filterArray.push(['class', 'is', classification])
+      _filterArray.push(['class', 'is', searchObj.classification])
     }
-    if (employee != '') {
+    if (searchObj.employee != '') {
       _filterArray.push('and')
-      _filterArray.push(['createdby', 'is', employee])
+      _filterArray.push(['createdby', 'is', searchObj.employee])
     }
-    if (tranid != '') {
+    if (searchObj.tranid != '') {
       _filterArray.push('and')
-      _filterArray.push(['tranid', 'is', tranid])
+      _filterArray.push(['tranid', 'is', searchObj.tranid])
     }
-    if (transtartdate != '') {
+    if (searchObj.transtartdate != '') {
       var _formattedDate = format.format({
-        value: transtartdate,
+        value: searchObj.transtartdate,
         type: format.Type.DATETIMETZ,
       })
 
       _filterArray.push('and')
       _filterArray.push(['trandate', 'onorafter', _formattedDate])
     }
-    if (tranenddate != '') {
+    if (searchObj.tranenddate != '') {
       var _formattedDate = format.format({
-        value: tranenddate,
+        value: searchObj.tranenddate,
         type: format.Type.DATETIMETZ,
       })
       _filterArray.push('and')
@@ -483,10 +427,10 @@ define([
     }
     //////////////////////////////////////////////////////////////////////////
     //20210908 walter add status filter
-    if (creditmemo_status.length !=0) { 
+    if (searchObj.creditmemo_status.length !=0) { 
 	    var _status_ary = []      
 	    //Create Memo status list
-	    _status_ary.push(creditmemo_status)  
+	    _status_ary.push(searchObj.creditmemo_status)  
 	    _filterArray.push('and')
 	    _filterArray.push(['status', search.Operator.ANYOF, _status_ary])   
     }   
@@ -1472,33 +1416,34 @@ define([
       ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       //1.Get Invoice LIST _invoiceSubList
-      searchInvoice(
-        form,
-        _invoiceSubList,
-        _select_subsidiary,
-        _selectcustomerid,        
-        _select_deptcode,
-        _select_classification,
-        _select_employee,
-        _select_invoice_tranid,
-        _select_transtartdate,
-        _select_tranenddate,
-        _invoice_status
-      )
+      var searchInvoiceObj = {
+		  'subsidiary': _select_subsidiary,
+		  'customerid': _selectcustomerid,
+		  'deptcode': _select_deptcode,
+		  'classification': _select_classification,
+		  'employee': _select_employee,
+		  'tranid': _select_invoice_tranid,
+		  'transtartdate': _select_transtartdate,
+		  'tranenddate': _select_tranenddate,
+		  'invoice_status': _invoice_status
+	  }
+      
+      searchInvoice(form, _invoiceSubList,searchInvoiceObj)
+      
       //2.Get Credit Memo LIST
-      searchCreateMemo(
-        form,
-        _creditMemoSubList,
-        _select_subsidiary,
-        _selectcustomerid,
-        _select_deptcode,
-        _select_classification,
-        _select_employee,
-        _select_creditmemo_tranid,
-        _select_transtartdate,
-        _select_tranenddate,
-        _creditmemo_status
-      )
+       var searchCreateMemoObj = {
+		  'subsidiary': _select_subsidiary,
+		  'customerid': _selectcustomerid,
+		  'deptcode': _select_deptcode,
+		  'classification': _select_classification,
+		  'employee': _select_employee,
+		  'tranid': _select_invoice_tranid,
+		  'transtartdate': _select_transtartdate,
+		  'tranenddate': _select_tranenddate,
+		  'creditmemo_status': _creditmemo_status
+	  }
+		  
+      searchCreateMemo(form, _creditMemoSubList, searchCreateMemoObj)
 
       //search result end
       //end access file
