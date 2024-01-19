@@ -883,7 +883,7 @@ define([
           	  _currency_text  = result.currency[0].text  //USD
             }
             //20231229 exchangerate 匯率
-            var _exchangerate = result['Currency.exchangerate']
+            var _exchangerate = result['exchangerate']
             if (_currency_text == 'USD') {
             	_gw_item_memo += 'Price: '+_exchangerate
             }  
@@ -3459,7 +3459,7 @@ define([
            	  _currency_text  = result.currency[0].text  //USD
             }
             //20231229 exchangerate 匯率
-            var _exchangerate = result['Currency.exchangerate']
+            var _exchangerate = result['exchangerate']
             if (_currency_text == 'USD') {
              	_item_remark += 'Price: '+_exchangerate
             }  
