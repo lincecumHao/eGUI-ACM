@@ -13,7 +13,7 @@ define([], () => {
     let exports = {};
 
     function addMakeCopyBtn(scriptContext) {
-        scriptContext.form.clientScriptModulePath = './gw_cs_ap_make_copy_btn.js'
+        scriptContext.form.clientScriptModulePath = 'SuiteApps/com.gateweb.gwegui/gw_ap_doc/application/gw_cs_ap_make_copy_btn.js'
         scriptContext.form.addButton({
             id: 'custpage_ap_make_copy',
             label: `Copy Previous AP Voucher Line`,
