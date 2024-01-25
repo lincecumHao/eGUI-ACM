@@ -129,7 +129,7 @@ define([
        
       var _formattedDate = format.format({
           value: _voucher_date,
-          type: format.Type.DATETIME,
+          type: format.Type.DATE,
           timezone: format.Timezone.ASIA_TAIPEI,
       })                    
       var _year_month = dateutility.getTaxYearMonthByDate(_formattedDate)
