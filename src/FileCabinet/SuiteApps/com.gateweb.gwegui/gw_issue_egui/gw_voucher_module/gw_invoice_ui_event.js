@@ -928,15 +928,6 @@ define([
         })  
       } 
       //////////////////////////////////////////////////////////////
-      //20211125 walter 折讓時增加B2B選項      
-      var _field_mig_type = _current_record.getField({
-        fieldId: 'custpage_mig_type'
-      })  
-	  _field_mig_type.insertSelectOption({
-        value: 'B2B',
-        text: 'B2B-存證'
-      })	   
-      //////////////////////////////////////////////////////////////
       //NE-338 
       var _field_allowance_log_type = _current_record.getField({
           fieldId: 'custpage_allowance_log_type'

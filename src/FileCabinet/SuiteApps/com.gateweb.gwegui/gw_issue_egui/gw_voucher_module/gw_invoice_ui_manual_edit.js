@@ -183,10 +183,6 @@ define([
       value: 'B2C',
       text: 'B2C-存證',
     })
-    _mig_type.addSelectOption({
-      value: 'B2B',
-      text: 'B2B-存證',
-    })
 
     //字軌使用方式
     var _selectDeductionPeriod = form.addField({
