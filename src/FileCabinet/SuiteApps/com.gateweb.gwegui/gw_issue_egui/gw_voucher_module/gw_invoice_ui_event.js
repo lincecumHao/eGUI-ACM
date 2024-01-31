@@ -122,32 +122,17 @@ define([
     } else if (_changeFieldId == 'custpage_mig_type') {
       changeMigType(_changeFieldId)
     } else if (_changeFieldId == 'custpage_allowance_deduction_period') {
+      var displayDeductionEGUINumberFlag = false
       var _allowance_deduction_period = _current_record.getValue({
         fieldId: _changeFieldId
       })
       var _deduction_egui_number = _current_record.getField({
         fieldId: 'custpage_deduction_egui_number'
       })
-      
-      var _gw_gui_num_start_field = _current_record.getField({
-        fieldId: 'custbody_gw_gui_num_start',
-      })
-         
       if (_allowance_deduction_period === 'user_selected') {
-        _deduction_egui_number.isDisplay = true //顯示 
-        _current_record.setValue({
-          fieldId: 'custpage_deduction_egui_number',
-          value: _current_record.getValue({fieldId: 'custbody_gw_gui_num_start'}),
-          ignoreFieldChange: true
-        })
-      } else {
-        _deduction_egui_number.isDisplay = false //不顯示
-        _current_record.setValue({
-          fieldId: 'custpage_deduction_egui_number',
-          value: '',
-          ignoreFieldChange: true
-        })
+        displayDeductionEGUINumberFlag = true
       }
+      _deduction_egui_number.isDisplay = displayDeductionEGUINumberFlag
     }
   }
  
@@ -856,7 +841,8 @@ define([
     if(deductionEGUINumber) {
       _current_record.setValue({
         fieldId: 'custpage_allowance_deduction_period',
-        value: 'user_selected'
+        value: 'user_selected',
+        ignoreFieldChange: true
       });
     } else {
       var _deduction_egui_number = _current_record.getField({
