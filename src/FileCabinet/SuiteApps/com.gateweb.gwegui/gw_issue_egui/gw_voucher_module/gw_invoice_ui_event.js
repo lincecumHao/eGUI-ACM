@@ -2792,7 +2792,7 @@ define([
 
           _voucherMainRecord.setValue({
             fieldId: 'custrecord_gw_tax_amount',
-            value: _main.tax_amount
+            value: Math.round(stringutility.convertToFloat(_main.tax_amount))
           })
           _voucherMainRecord.setValue({
             fieldId: 'custrecord_gw_tax_type',

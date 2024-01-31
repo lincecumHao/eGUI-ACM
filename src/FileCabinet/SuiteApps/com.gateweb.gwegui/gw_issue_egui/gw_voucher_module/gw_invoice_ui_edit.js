@@ -1204,10 +1204,28 @@ define([
       var _ns_item_tax_amount = stringutility.convertToFloat(
         _result.taxamount
       ) //稅額總計 -5.00
+
+      log.audit({
+        title: '_result.currency',
+        details: _result.currency
+      })
+
       //NS 的Item金額小計
       //var _ns_item_total_amount = stringutility.convertToFloat(_result.formulacurrency) //Item金額小計
       var _ns_item_total_amount = stringutility.convertToFloat(_result.amount)+
                                   stringutility.convertToFloat(_result.taxamount)  //Item金額小計(含稅)
+
+      if(_result.currency[0].text !== 'TWD' && _result.taxRate === '5.00%' && _result.taxamount !== '.00') {
+        _ns_item_total_amount = (stringutility.convertToFloat(_result.amount) + stringutility.convertToFloat(_result.amount) * 0.05).toFixed(_numericToFixed)
+        _ns_item_tax_amount = (stringutility.convertToFloat(_result.amount) * 0.05).toFixed(_numericToFixed)
+        _ns_total_tax_amount = (stringutility.convertToFloat(_result.total) - (stringutility.convertToFloat(_result.total) / 1.05)).toFixed(_numericToFixed)
+      }
+
+      log.audit({
+        title: '**_ns_item_total_amount',
+        details: _ns_item_total_amount
+      })
+
       if (stringutility.convertToFloat(_result.quantity) < 0)
         _ns_item_total_amount = -1 * _ns_item_total_amount
 
@@ -1342,16 +1360,17 @@ define([
         ) //金額總計
         //grossamount
         _ns_SumTotalAmount += _ns_total_amount
-        _ns_SumTaxAmount += _ns_tax_total_amount
+        // _ns_SumTaxAmount += _ns_tax_total_amount
+      }
+
+      if(_result.taxline) {
+        _ns_SumTaxAmount += stringutility.convertToFloat(
+            _result.amount
+        )
       }
 
       //只放 Sales Items 進來 (Discount Item 要排除)
-      if (
-        _recordType == 'invoice' &&
-        _mainline != '*'
-        //20210908 walter modify => 折扣項目作進Item, 不另外處理
-        //&&  _itemtype != 'Discount'
-      ) {
+      if (_recordType == 'invoice' && _mainline != '*' && !_result.taxline) {
         log.debug('get _taxObj', JSON.stringify(_taxObj))
         if (typeof _taxObj !== 'undefined') {
           if (_taxObj.voucher_property_value == '1') {
@@ -1467,9 +1486,17 @@ define([
           line: row,
           value: stringutility.trimOrAppendBlank(_ns_item_total_amount)
         })
-        
+
+        log.audit({
+          title: '***_ns_item_total_amount***',
+          details: _ns_item_total_amount
+        })
          //NE241 含稅金額
         _sum_item_total_amount += stringutility.convertToFloat(_ns_item_total_amount)
+        log.audit({
+          title: '***_sum_item_total_amount***',
+          details: _sum_item_total_amount
+        })
 
         sublist.setSublistValue({
           id: 'custpage_invoice_total_tax_amount',
@@ -1698,6 +1725,11 @@ define([
       id: 'custpage_sum_item_total_amount'
     })
     _sum_item_total_amount_field.defaultValue = _sum_item_total_amount.toFixed(_numericToFixed)
+
+    log.audit({
+      title: '***_sum_item_total_amount.toFixed(_numericToFixed)',
+      details: _sum_item_total_amount.toFixed(_numericToFixed)
+    })
 
     //處理總計計部分-START
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -2662,8 +2694,8 @@ define([
     var searchFilters = []
     searchFilters.push(['type', 'anyof', 'CustInvc'])
     searchFilters.push('AND')
-    searchFilters.push(['taxline', 'is', 'F'])
-    searchFilters.push('AND')
+    // searchFilters.push(['taxline', 'is', 'F'])
+    // searchFilters.push('AND')
     searchFilters.push(['cogs', 'is', 'F'])
     searchFilters.push('AND')
     searchFilters.push(['shipping', 'is', 'F'])
