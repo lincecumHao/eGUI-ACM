@@ -1146,6 +1146,11 @@ define([
 
       //20211007 walter modify
       _gw_gui_main_memo = _result.custbody_gw_gui_main_memo
+      //20240202 
+      //總備註:
+      //幣別 :
+      //匯率 :
+      //外幣總金額(含稅):
 
       //Invoice統編
       _customer_ban = _result.custbody_gw_tax_id_number //99999997
@@ -1296,12 +1301,28 @@ define([
     	  _currency_value = _result.currency[0].value //2
     	  _currency_text  = _result.currency[0].text  //USD
       }
-      //20231229 exchangerate 匯率
-      var _exchangerate = _result['exchangerate']
+      //20231229 Currency.exchangerate 匯率
+      var _item_exchangerate = _result['Currency.exchangerate']
       if (_currency_text == 'USD') {
-          _item_memo += 'Price: '+_exchangerate
+          _item_memo += 'Price: '+_item_exchangerate
       }  
-
+      
+      var _exchangerate = _result['exchangerate'] 
+      
+      //NE-374 發票總備註內容 20240202 
+      //總備註:
+      //幣別 :
+      //匯率 :
+      //外幣總金額(含稅):
+      if (_gw_gui_main_memo.length == 0){
+    	  _gw_gui_main_memo = '總備註:'
+      } else {
+    	  _gw_gui_main_memo += '|'+'總備註:'
+      }  
+      _gw_gui_main_memo +='|'+'幣別 :'+_currency_text
+      _gw_gui_main_memo +='|'+'匯率 :'+_exchangerate
+      _gw_gui_main_memo +='|'+'外幣總金額(含稅) :'+ (stringutility.convertToFloat(_result.total)/stringutility.convertToFloat(_exchangerate)).toFixed(2)
+      
       if (_itemtype === 'Discount') {
         //20210908 walter modify => 折扣項目作進Item, 不另外處理
         //折扣項目
@@ -2322,7 +2343,7 @@ define([
     	  _currency_text  = _result.currency[0].text  //USD
       }
       //20231229 exchangerate 匯率
-      var _exchangerate = _result['exchangerate']
+      var _exchangerate = _result['Currency.exchangerate']
       if (_currency_text == 'USD') {
           _item_memo += 'Price: '+_exchangerate
       }  

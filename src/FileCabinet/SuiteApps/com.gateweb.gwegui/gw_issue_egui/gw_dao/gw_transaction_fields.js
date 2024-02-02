@@ -476,6 +476,13 @@ define(['../../library/ramda.min'], function (ramda) {
             name: 'exchangerate',
             join: '',
         },
+        'Currency.exchangerate': {
+            id: 'Currency.exchangerate',
+            sourceField: 'Currency.exchangerate',
+            outputField: 'Currency.exchangerate',
+            name: 'exchangerate',
+            join: 'Currency',
+        },
         'item.custitem_ntt_item_model': {
             id: 'item.custitem_ntt_item_model',
             sourceField: 'item.custitem_ntt_item_model',

@@ -870,9 +870,8 @@ define([
             var _buyer_address = result.custbody_gw_gui_address
 
             ///////////////////////////////////////////////////////////////////////////////////////////////////
-            var _random_number = invoiceutility.getRandomNum(1000, 9999)
-			
-            var _gw_gui_main_memo = result.custbody_gw_gui_main_memo //額外備註
+            var _random_number = invoiceutility.getRandomNum(1000, 9999)			
+            var _gw_gui_main_memo = result.custbody_gw_gui_main_memo //額外備註            
             var _gw_item_memo = result.custcol_gw_item_memo //項目備註
             ////////////////////////////////////////////////////////////
             //20231229 currency 幣別
@@ -884,10 +883,25 @@ define([
             }
             //20231229 exchangerate 匯率
             var _exchangerate = result['exchangerate']
+            var _item_exchangerate = result['Currency.exchangerate']
             if (_currency_text == 'USD') {
-            	_gw_item_memo += 'Price: '+_exchangerate
+            	_gw_item_memo += 'Price: '+_item_exchangerate
             }  
             ////////////////////////////////////////////////////////////
+            //NE-374 發票總備註內容 20240202 
+            //總備註:
+            //幣別 :
+            //匯率 :
+            //外幣總金額(含稅):
+            if (_gw_gui_main_memo.length == 0){
+            	_gw_gui_main_memo = '總備註:'
+            } else {
+            	_gw_gui_main_memo += '|'+'總備註:'
+            } 
+           	_gw_gui_main_memo +='|'+'幣別 :'+_currency_text
+           	_gw_gui_main_memo +='|'+'匯率 :'+_exchangerate
+           	_gw_gui_main_memo +='|'+'外幣總金額(含稅) :'+ (stringutility.convertToFloat(result.total)/stringutility.convertToFloat(_exchangerate)).toFixed(2)
+     
             ////////////////////////////////////////////////////////////
             //處理零稅率資訊
             //海關出口單類別
@@ -3459,7 +3473,7 @@ define([
            	  _currency_text  = result.currency[0].text  //USD
             }
             //20231229 exchangerate 匯率
-            var _exchangerate = result['exchangerate']
+            var _exchangerate = result['Currency.exchangerate']
             if (_currency_text == 'USD') {
              	_item_remark += 'Price: '+_exchangerate
             }  
