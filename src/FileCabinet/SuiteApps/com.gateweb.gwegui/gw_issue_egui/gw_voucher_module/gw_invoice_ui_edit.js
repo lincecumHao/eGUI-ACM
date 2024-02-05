@@ -1307,8 +1307,7 @@ define([
           _item_memo += 'Price: '+_item_exchangerate
       }  
       
-      var _exchangerate = _result['exchangerate'] 
-      
+      var _exchangerate = _result['exchangerate']       
       //NE-374 發票總備註內容 20240202 
       //總備註:
       //幣別 :
@@ -1321,8 +1320,11 @@ define([
       }  
       _gw_gui_main_memo +='|'+'幣別 :'+_currency_text
       _gw_gui_main_memo +='|'+'匯率 :'+_exchangerate
-      _gw_gui_main_memo +='|'+'外幣總金額(含稅) :'+ (stringutility.convertToFloat(_result.total)/stringutility.convertToFloat(_exchangerate)).toFixed(2)
+      _gw_gui_main_memo +='|'+'外幣總金額(含稅) :' 
       
+      if (_exchangerate.length != 0 && stringutility.convertToFloat(_exchangerate) != 0){
+      	_gw_gui_main_memo += (stringutility.convertToFloat(_result.total)/stringutility.convertToFloat(_exchangerate)).toFixed(2)
+      }
       if (_itemtype === 'Discount') {
         //20210908 walter modify => 折扣項目作進Item, 不另外處理
         //折扣項目
