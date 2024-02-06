@@ -1,0 +1,25 @@
+<suitelet scriptid="customscript_gw_manual_egui_import_actio">
+  <description></description>
+  <isinactive>F</isinactive>
+  <name>歷史發票匯入-Action</name>
+  <notifyadmins>F</notifyadmins>
+  <notifyemails></notifyemails>
+  <notifyowner>T</notifyowner>
+  <notifyuser>F</notifyuser>
+  <scriptfile>[/SuiteApps/com.gateweb.gwegui/gw_issue_egui/gw_voucher_module/gw_manual_egui_import_action.js]</scriptfile>
+  <scriptdeployments>
+    <scriptdeployment scriptid="customdeploy_gw_manual_egui_import_actio">
+      <allemployees>F</allemployees>
+      <allpartners>F</allpartners>
+      <allroles>T</allroles>
+      <audslctrole></audslctrole>
+      <eventtype></eventtype>
+      <isdeployed>T</isdeployed>
+      <isonline>F</isonline>
+      <loglevel>DEBUG</loglevel>
+      <runasrole></runasrole>
+      <status>RELEASED</status>
+      <title>歷史發票匯入-Action</title>
+    </scriptdeployment>
+  </scriptdeployments>
+</suitelet>
