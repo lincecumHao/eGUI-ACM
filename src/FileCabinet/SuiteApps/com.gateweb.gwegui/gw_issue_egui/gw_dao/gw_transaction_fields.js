@@ -539,6 +539,13 @@ define(['../../library/ramda.min'], function (ramda) {
             name: 'line.cseg_ntt_sales_type',
             join: '',
         },
+        'fxrate': {
+            id: 'fxrate',
+            sourceField: 'fxrate',
+            outputField: 'fxrate',
+            name: 'fxrate',
+            join: '',
+        },
         'subsidiary': {
             id: 'subsidiary',
             sourceField: 'subsidiary',

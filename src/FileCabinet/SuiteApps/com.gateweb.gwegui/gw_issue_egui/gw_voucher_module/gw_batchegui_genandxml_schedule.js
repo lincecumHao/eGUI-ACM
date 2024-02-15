@@ -886,7 +886,7 @@ define([
             var _item_exchangerate = result['Currency.exchangerate']
             if (_currency_text == 'USD') {
             	//_gw_item_memo += 'Price: '+_item_exchangerate
-            	_gw_item_memo += 'Price: '+ (stringutility.convertToFloat(_exchangerate)*stringutility.convertToFloat(_quantity))==0?"":stringutility.convertToFloat(_rate)/(stringutility.convertToFloat(_quantity)*stringutility.convertToFloat(_exchangerate))
+            	_gw_item_memo += 'Price: '+ result['fxrate']  
             }  
             ////////////////////////////////////////////////////////////
             //NE-374 發票總備註內容 20240202 
@@ -3479,6 +3479,7 @@ define([
             var _exchangerate = result['Currency.exchangerate']
             if (_currency_text == 'USD') {
              	//_item_remark += 'Price: '+_exchangerate
+            	//_item_remark += 'Price: '+ result['fxrate']  
             }  
             //////////////////////////////////////////////////////////////////////////////////////////////////
             //統編

@@ -997,6 +997,11 @@ define([
   function getCreditMemoItemName(result) {
 	  return result.custcol_ntt_iv_itemname; 
   }
+  
+  function round(num) {
+	  var m = Number((Math.abs(num) * 100).toPrecision(15));
+	  return Math.round(m) / 100 * Math.sign(num);
+  }
 
   function createInvoiceDetails(form, invoiceDetailsArrayObject) {
     //處理Detail
@@ -1306,8 +1311,8 @@ define([
       //20231229 Currency.exchangerate 匯率
       var _item_exchangerate = _result['Currency.exchangerate']
       if (_currency_text == 'USD') {
-          //_item_memo += 'Price: '+_item_exchangerate
-          _item_memo += 'Price: '+ (stringutility.convertToFloat(_exchangerate)*stringutility.convertToFloat(_quantity))==0?"":stringutility.convertToFloat(_rate)/(stringutility.convertToFloat(_quantity)*stringutility.convertToFloat(_exchangerate))
+          //_item_memo += 'Price: '+_item_exchangerate 
+          _item_memo += 'Price: '+ _result['fxrate']  
       }  
            
       //NE-374 發票總備註內容 20240202 
@@ -2350,6 +2355,7 @@ define([
       var _exchangerate = _result['Currency.exchangerate']
       if (_currency_text == 'USD') {
           //_item_memo += 'Price: '+_exchangerate
+    	  //_item_memo += 'Price: '+ _result['fxrate']  
       }  
 
       if (_itemtype === 'Discount') {
