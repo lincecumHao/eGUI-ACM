@@ -2354,7 +2354,7 @@ define([
           _main.free_sales_amount = _freeSalesAmountSum.toFixed(_numericToFixed)
           _main.sales_amount = _salesAmountSum.toFixed(_numericToFixed)
 
-          _main.tax_amount = _taxAmountSum.toFixed(_numericToFixed)
+          // _main.tax_amount = _taxAmountSum.toFixed(_numericToFixed)
           _main.total_amount = _totalAmountSum.toFixed(_numericToFixed)
 
           if (_positive == true && _negative == true) {
