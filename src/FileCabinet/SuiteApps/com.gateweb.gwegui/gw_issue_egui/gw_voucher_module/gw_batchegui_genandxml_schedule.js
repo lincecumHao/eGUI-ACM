@@ -3478,7 +3478,7 @@ define([
             //20231229 exchangerate 匯率
             var _exchangerate = result['Currency.exchangerate']
             if (_currency_text == 'USD') {
-             	_item_remark += 'Price: '+_exchangerate
+             	//_item_remark += 'Price: '+_exchangerate
             }  
             //////////////////////////////////////////////////////////////////////////////////////////////////
             //統編

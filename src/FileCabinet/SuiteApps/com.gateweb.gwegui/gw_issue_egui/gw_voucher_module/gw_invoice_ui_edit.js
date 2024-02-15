@@ -2349,7 +2349,7 @@ define([
       //20231229 exchangerate 匯率
       var _exchangerate = _result['Currency.exchangerate']
       if (_currency_text == 'USD') {
-          _item_memo += 'Price: '+_exchangerate
+          //_item_memo += 'Price: '+_exchangerate
       }  
 
       if (_itemtype === 'Discount') {
