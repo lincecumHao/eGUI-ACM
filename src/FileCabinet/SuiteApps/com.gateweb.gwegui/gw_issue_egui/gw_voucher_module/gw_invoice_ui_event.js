@@ -831,7 +831,8 @@ define([
     console.log('deductionEGUINumber', deductionEGUINumber);
 
     //檢查明細金額的一致性
-    var _diff_amount = stringutility.convertToFloat(_total_amount)-stringutility.convertToFloat(_sum_item_total_amount)
+    // var _diff_amount = stringutility.convertToFloat(_total_amount)-stringutility.convertToFloat(_sum_item_total_amount)
+    var _diff_amount = stringutility.convertToFloat(_total_amount) - Math.round(stringutility.convertToFloat(_sum_item_total_amount))
     if (_tax_diff_balance < Math.abs(_diff_amount)){
       _item_detail_summary_error=true
       var _title = '憑證管理'
@@ -2484,7 +2485,10 @@ define([
       for (var i = 0; i < documentAry.length; i++) {
         var _documentObj = documentAry[i]
         var _main = _documentObj.main
+        console.log('_main', JSON.stringify(_main))
         var _details = _documentObj.details
+        console.log('_details', JSON.stringify(_details))
+        debugger;
         //alert('_main='+JSON.stringify(_main));
         ////////////////////////////////////////////////////////////////////////////////////////////////////////
         //20201113 walter modify 檢查稅差
@@ -3044,6 +3048,8 @@ define([
           })
 
           try {
+            console.log('_voucherMainRecord', JSON.stringify(_voucherMainRecord))
+            debugger;
             _mainRecordId = _voucherMainRecord.save()
 
             _forward_voucher_main_id = _mainRecordId

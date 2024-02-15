@@ -1222,8 +1222,12 @@ define([
       }
 
       log.audit({
-        title: '**_ns_item_total_amount',
-        details: _ns_item_total_amount
+        title: '***NS Amount Info***',
+        details: {
+          _ns_item_total_amount,
+          _ns_item_tax_amount,
+          _ns_total_tax_amount
+        }
       })
 
       if (stringutility.convertToFloat(_result.quantity) < 0)
