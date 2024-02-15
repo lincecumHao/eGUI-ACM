@@ -1307,7 +1307,7 @@ define([
       var _item_exchangerate = _result['Currency.exchangerate']
       if (_currency_text == 'USD') {
           //_item_memo += 'Price: '+_item_exchangerate
-          _item_memo += 'Price: '+ stringutility.convertToFloat(_exchangerate)==0?"":stringutility.convertToFloat(_rate)/stringutility.convertToFloat(_exchangerate)
+          _item_memo += 'Price: '+ (stringutility.convertToFloat(_exchangerate)*stringutility.convertToFloat(_quantity))==0?"":stringutility.convertToFloat(_rate)/(stringutility.convertToFloat(_quantity)*stringutility.convertToFloat(_exchangerate))
       }  
            
       //NE-374 發票總備註內容 20240202 
