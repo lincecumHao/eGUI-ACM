@@ -705,7 +705,7 @@ define([
 
         var _existFlag = false
 
-
+        var fxamount = 0
         // _mySearch.run().each(function (result) {
         invoiceDetailsArrayObject.forEach(function (result){
           //var _result = JSON.parse(JSON.stringify(result))
@@ -894,7 +894,7 @@ define([
             //幣別 :
             //匯率 :
             //外幣總金額(含稅):
-            var fxamount = result['fxamount']
+            fxamount += stringutility.convertToFloat(result['fxamount'])
             if (_gw_gui_main_memo.length == 0){
             	_gw_gui_main_memo = '總備註:'
             } else {
@@ -1129,6 +1129,8 @@ define([
               tax9Amount: _tax9_item_amount,
               amountObj: _amountJsonObj,
             }
+            
+            fxamount=0
 
             //Amount Section
             _amountJsonObj.taxType = _main_tax_type
