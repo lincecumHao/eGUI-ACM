@@ -3611,15 +3611,12 @@ define([
                 var _obj = _details[j] //折讓商品清單
 
                 var _deductionTaxType = _obj.tax_type
-                //20210319 walter modify
-                var _deductionAmount = Math.abs(
-                  stringutility.convertToFloat(_obj.item_amount)
-                )
-
+                var lineDeductionAmount = (stringutility.convertToFloat(_obj.unit_price) > 0) ?
+                    Math.abs(stringutility.convertToFloat(_obj.item_amount)) : (0 - stringutility.convertToFloat(_obj.item_amount))
                 //取得折讓扣抵發票清單
                 var _deductionItems = getDeductionInvoiceInformation(
                   _deductionTaxType,
-                  _deductionAmount,
+                  lineDeductionAmount,
                   _eGUIDetails
                 )
                 //alert('取得折讓扣抵發票清單='+JSON.stringify(_deductionItems));
