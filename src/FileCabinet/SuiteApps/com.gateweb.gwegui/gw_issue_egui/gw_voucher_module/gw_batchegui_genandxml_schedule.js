@@ -894,6 +894,7 @@ define([
             //幣別 :
             //匯率 :
             //外幣總金額(含稅):
+            var fxamount = result['fxamount']
             if (_gw_gui_main_memo.length == 0){
             	_gw_gui_main_memo = '總備註:'
             } else {
@@ -901,10 +902,8 @@ define([
             } 
            	_gw_gui_main_memo +='|'+'幣別 :'+_currency_text
            	_gw_gui_main_memo +='|'+'匯率 :'+_exchangerate
-           	_gw_gui_main_memo +='|'+'外幣總金額(含稅) :' 
-            if (_exchangerate.length != 0 && stringutility.convertToFloat(_exchangerate) != 0){
-            	_gw_gui_main_memo += (stringutility.convertToFloat(result.total)/stringutility.convertToFloat(_exchangerate)).toFixed(2)
-            }
+           	_gw_gui_main_memo +='|'+'外幣總金額(含稅) :' + fxamount
+          
             ////////////////////////////////////////////////////////////
             //處理零稅率資訊
             //海關出口單類別

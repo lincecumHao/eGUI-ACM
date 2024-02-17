@@ -1150,12 +1150,7 @@ define([
       }
 
       //20211007 walter modify
-      _gw_gui_main_memo = _result.custbody_gw_gui_main_memo
-      //20240202 
-      //總備註:
-      //幣別 :
-      //匯率 :
-      //外幣總金額(含稅):
+      _gw_gui_main_memo = _result.custbody_gw_gui_main_memo 
 
       //Invoice統編
       _customer_ban = _result.custbody_gw_tax_id_number //99999997
@@ -1320,6 +1315,7 @@ define([
       //幣別 :
       //匯率 :
       //外幣總金額(含稅):
+      var _fxamount = _result['fxamount']
       if (_gw_gui_main_memo.length == 0){
     	  _gw_gui_main_memo = '總備註:'
       } else {
@@ -1327,11 +1323,8 @@ define([
       }  
       _gw_gui_main_memo +='|'+'幣別 :'+_currency_text
       _gw_gui_main_memo +='|'+'匯率 :'+_exchangerate
-      _gw_gui_main_memo +='|'+'外幣總金額(含稅) :' 
-      
-      if (_exchangerate.length != 0 && stringutility.convertToFloat(_exchangerate) != 0){
-      	_gw_gui_main_memo += (stringutility.convertToFloat(_result.total)/stringutility.convertToFloat(_exchangerate)).toFixed(2)
-      }
+      _gw_gui_main_memo +='|'+'外幣總金額(含稅) :' + _fxamount
+       
       if (_itemtype === 'Discount') {
         //20210908 walter modify => 折扣項目作進Item, 不另外處理
         //折扣項目

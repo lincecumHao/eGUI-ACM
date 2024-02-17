@@ -546,6 +546,13 @@ define(['../../library/ramda.min'], function (ramda) {
             name: 'fxrate',
             join: '',
         },
+        'fxamount': {
+            id: 'fxamount',
+            sourceField: 'fxamount',
+            outputField: 'fxamount',
+            name: 'fxamount',
+            join: '',
+        },
         'subsidiary': {
             id: 'subsidiary',
             sourceField: 'subsidiary',
