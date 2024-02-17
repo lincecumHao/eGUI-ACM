@@ -705,7 +705,7 @@ define([
 
         var _existFlag = false
 
-
+        var fxamount = 0
         // _mySearch.run().each(function (result) {
         invoiceDetailsArrayObject.forEach(function (result){
           //var _result = JSON.parse(JSON.stringify(result))
@@ -721,7 +721,8 @@ define([
           //   _account_value = result.account[0].value //54
           //   _account_text = result.account[0].text //4000 Sales
           // }
-
+          if (_mainline == '*') fxamount = result['fxamount']
+       
           /////////////////////////////////////////////////////////////////////////////////////
           if (_mainline != '*' && stringutility.trim(_itemtype) != '') {
             _existFlag = true
@@ -893,8 +894,7 @@ define([
             //總備註:
             //幣別 :
             //匯率 :
-            //外幣總金額(含稅):
-            var fxamount = result['fxamount']
+            //外幣總金額(含稅): 
             if (_gw_gui_main_memo.length == 0){
             	_gw_gui_main_memo = '總備註:'
             } else {
@@ -1129,6 +1129,7 @@ define([
               tax9Amount: _tax9_item_amount,
               amountObj: _amountJsonObj,
             }
+             
 
             //Amount Section
             _amountJsonObj.taxType = _main_tax_type

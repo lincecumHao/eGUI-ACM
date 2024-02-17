@@ -1080,7 +1080,7 @@ define([
     //捐贈代碼
     var _gw_gui_donation_code = ''
     ////////////////////////////////////////////////////////////
-
+    var _fxamount = 0
    	invoiceDetailsArrayObject.forEach(function (_result){
    	  log.debug({title: 'createInvoiceDetails - result', details: _result}) 
 
@@ -1184,6 +1184,8 @@ define([
         _sales_order_id_ary.push(_sales_order_id)
         _sales_order_number = _result.createdfrom[0].text //sales order  #42
       }
+       
+      if (_mainline == '*') _fxamount = _result['fxamount']   
 
       var _amount = stringutility.convertToFloat(_result.amount) //31428.57(未稅)
       //20210707 walter modify
@@ -1336,8 +1338,7 @@ define([
       //總備註:
       //幣別 :
       //匯率 :
-      //外幣總金額(含稅):
-      var _fxamount = _result['fxamount']
+      //外幣總金額(含稅): 
       if (_gw_gui_main_memo.length == 0){
     	  _gw_gui_main_memo = '總備註:'
       } else {
