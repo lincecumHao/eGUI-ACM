@@ -69,11 +69,11 @@ define([
   function searchInvoice(form, subListObj,searchObj) { 
 	//NE-419   
 	var excludeTranidAry = searchInvoiceTriangularItemTradeList(searchObj)
-	     
+   
     var _mySearch = search.load({
       id: _gw_invoice_detail_search_id,
     })
-
+  
     var _filterArray = []
     _filterArray.push(['mainline', search.Operator.IS, true])
 
@@ -140,10 +140,12 @@ define([
     }    
     ///////////////////////////////////////////////////////////////////////////////////
     //NE-419
+    /**
     if (excludeTranidAry.length != 0) {  	
     	_filterArray.push('and')
   	    _filterArray.push(['tranid', search.Operator.DOESNOTCONTAIN, excludeTranidAry])
     }
+    */
     _mySearch.filterExpression = _filterArray
     log.debug('invoice filterArray', JSON.stringify(_filterArray))
     ///////////////////////////////////////////////////////////////////////////////////
@@ -162,16 +164,20 @@ define([
       }
 
       //filter voided
-      if (_check_id != internalid && _invoice_status != 'voided') {
+      var _tranid = _result.values.tranid
+      //NE-419
+      const checkExcludeTranid = excludeTranidAry.filter((excludeValue) => excludeValue==_tranid)
+      log.debug('checkExcludeTranid', _tranid+' = '+checkExcludeTranid)
+      
+      if (_check_id != internalid && _invoice_status != 'voided' && checkExcludeTranid.length==0) {
         _check_id = internalid
         var _valueObj = _result.values //object
         subListObj.setSublistValue({
           id: 'customer_search_invoice_id',
           line: i,
           value: internalid,
-        })
-
-        var _tranid = _result.values.tranid
+        }) 
+        
         subListObj.setSublistValue({
           id: 'customer_invoice_tranid',
           line: i,

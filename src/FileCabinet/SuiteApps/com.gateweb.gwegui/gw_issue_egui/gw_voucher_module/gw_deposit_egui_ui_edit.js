@@ -246,6 +246,7 @@ define([
       label: '發票備註',
       container: 'row01_fieldgroupid',
     })
+    _main_remark.defaultValue = customer_deposit_record.getValue({fieldId: 'custbody_gw_gui_main_memo'}) || ''
     //字軌使用方式 _defaultAssignLogType
     var _selectDeductionPeriod = form.addField({
       id: 'custpage_allowance_log_type',
