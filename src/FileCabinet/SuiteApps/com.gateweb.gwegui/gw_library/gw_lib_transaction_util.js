@@ -34,7 +34,7 @@ define([
 
     exports.clearValueForCreditMemo = function (scriptContext) {
         gwTransactionEGUIFields.allFieldIds.forEach(function (fieldId) {
-            if(gwTransactionEGUIFields.fields[fieldId].clearValueForCreditMemo) {
+            if(gwTransactionEGUIFields.fields[fieldId].needToClearForCreditMemo) {
                 scriptContext.newRecord.setValue({
                     fieldId: gwTransactionEGUIFields.fields[fieldId].id,
                     value: gwTransactionEGUIFields.fields[fieldId].defaultValue
