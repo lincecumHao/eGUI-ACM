@@ -133,10 +133,11 @@ define([
 	  var email = customerRecord.getValue('email') 
 	  var ntt_multiple_email = customerRecord.getValue('custentity_ntt_multiple_email') 
       var recipients = ntt_multiple_email || email || 'jackielin@gateweb.com.tw'
-      
-      log.debug({ title: 'recipients', details: recipients })  
-        
-      return recipients.split(',') 
+      //NE-377 20240301 客戶確認未來使用分號 ; 作為分隔符號
+      log.debug({ title: 'recipients', details: recipients })   
+	  var multi_mail_address_ary = recipients.split(';') 
+         
+      return multi_mail_address_ary.map(mail_address => mail_address.trim())
     }
 
     send(subject, emailContentObj) {
