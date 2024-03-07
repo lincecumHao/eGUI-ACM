@@ -1184,8 +1184,8 @@ define([
         _sales_order_id_ary.push(_sales_order_id)
         _sales_order_number = _result.createdfrom[0].text //sales order  #42
       }
-       
-      if (_mainline == '*') _fxamount = _result['fxamount']   
+      //NE-451 進金生教育訓練-測試問題 No.2
+      if (_mainline == '*') _fxamount += _result['fxamount']   
 
       var _amount = stringutility.convertToFloat(_result.amount) //31428.57(未稅)
       //20210707 walter modify
@@ -1307,7 +1307,8 @@ define([
       var _exchangerate = _result['exchangerate']   
       //20231229 Currency.exchangerate 匯率
       var _item_exchangerate = _result['Currency.exchangerate']
-      if (_currency_text == 'USD') {
+      //NE-451 進金生教育訓練-測試問題 - No.3
+      if (_currency_text != 'TWD') {
           //_item_memo += 'Price: '+_item_exchangerate 
           _item_memo += 'Price: '+ _result['fxrate']  
       }  
