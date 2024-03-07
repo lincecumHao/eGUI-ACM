@@ -1190,7 +1190,7 @@ define([
         _sales_order_number = _result.createdfrom[0].text //sales order  #42
       }
       //NE-451 進金生教育訓練-測試問題 No.2
-      if (_mainline == '*') _fxamount += _result['fxamount']   
+      if (_mainline == '*') _fxamount += stringutility.convertToFloat(_result['fxamount'])   
 
       var _amount = stringutility.convertToFloat(_result.amount) //31428.57(未稅)
       //20210707 walter modify
