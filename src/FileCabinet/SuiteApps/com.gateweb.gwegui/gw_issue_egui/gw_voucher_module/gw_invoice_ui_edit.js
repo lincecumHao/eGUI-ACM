@@ -1079,8 +1079,13 @@ define([
     var _gw_gui_carrier_id_2 = ''
     //捐贈代碼
     var _gw_gui_donation_code = ''
-    ////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////   
     var _fxamount = 0
+    ////////////////////////////////////////////////////////////
+    //NE-451 進金生教育訓練-測試問題
+    //檢查需相同幣別及匯率需一致
+    var _gw_check_currency_and_exchangerate = ''
+    
    	invoiceDetailsArrayObject.forEach(function (_result){
    	  log.debug({title: 'createInvoiceDetails - result', details: _result}) 
 
@@ -1311,21 +1316,21 @@ define([
       if (_currency_text != 'TWD') {
           //_item_memo += 'Price: '+_item_exchangerate 
           _item_memo += 'Price: '+ _result['fxrate']  
-      }  
-           
-      //NE-374 發票總備註內容 20240202 
-      //總備註:
-      //幣別 :
-      //匯率 :
-      //外幣總金額(含稅): 
-      if (_gw_gui_main_memo.length == 0){
-    	  _gw_gui_main_memo = '總備註:'
-      } else {
-    	  _gw_gui_main_memo += '|'+'總備註:'
-      }  
-      _gw_gui_main_memo +='|'+'幣別 :'+_currency_text
-      _gw_gui_main_memo +='|'+'匯率 :'+_exchangerate
-      _gw_gui_main_memo +='|'+'外幣總金額(含稅) :' + _fxamount
+     	           
+	      //NE-374 發票總備註內容 20240202 
+	      //總備註:
+	      //幣別 :
+	      //匯率 :
+	      //外幣總金額(含稅): 
+	      if (_gw_gui_main_memo.length == 0){
+	    	  _gw_gui_main_memo = '總備註:'
+	      } else {
+	    	  _gw_gui_main_memo += '|'+'總備註:'
+	      }  
+	      _gw_gui_main_memo +='|'+'幣別 :'+_currency_text
+	      _gw_gui_main_memo +='|'+'匯率 :'+_exchangerate
+	      _gw_gui_main_memo +='|'+'外幣總金額(含稅) :' + _fxamount
+      }
        
       if (_itemtype === 'Discount') {
         //20210908 walter modify => 折扣項目作進Item, 不另外處理
