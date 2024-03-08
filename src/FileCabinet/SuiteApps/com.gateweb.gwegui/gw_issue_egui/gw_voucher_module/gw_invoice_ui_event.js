@@ -850,6 +850,17 @@ define([
       })
       _deduction_egui_number.isDisplay = false //預設不顯示
     }
+    
+    var _check_currency_field = _current_record.getValue({fieldId: 'custpage_check_currency_field'})
+    if(_check_currency_field=='F'){
+    	
+    	//document.getElementById('custpage_create_voucher_button').disabled = true
+    	window.document.querySelector('#custpage_create_voucher_button').hidden = true; 
+    	
+    	var _err_message='不可彙開不同幣別及匯率憑證!!!'
+        gwmessage.showErrorMessage(_title, _err_message)
+    }
+      
   }
 
   function showCreditMemoForm(
