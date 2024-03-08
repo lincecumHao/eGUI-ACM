@@ -926,16 +926,17 @@ define([
         })  
       } 
       //////////////////////////////////////////////////////////////
-      //NE-338 
-      var _field_allowance_log_type = _current_record.getField({
+      //NE-338
+      if(invoice_length <= 1) {
+        var _field_allowance_log_type = _current_record.getField({
           fieldId: 'custpage_allowance_log_type'
-      })  
-  	  _field_allowance_log_type.insertSelectOption({
+        })
+        _field_allowance_log_type.insertSelectOption({
           value: 'RETRIEVE',
           isSelected: true,
           text: '折讓單待回收'
-      }) 
-      
+        })
+      }
     } catch (e) {
       console.log(e.name + ':' + e.message)
     }
