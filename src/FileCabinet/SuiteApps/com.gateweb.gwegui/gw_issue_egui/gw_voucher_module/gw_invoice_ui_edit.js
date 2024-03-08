@@ -1003,6 +1003,8 @@ define([
 	  return Math.round(m) / 100 * Math.sign(num);
   }
 
+  var _gw_check_currency_and_exchangerate = ''
+	  
   function createInvoiceDetails(form, invoiceDetailsArrayObject) {
     //處理Detail
     var sublist = form.addSublist({
@@ -1080,12 +1082,11 @@ define([
     //捐贈代碼
     var _gw_gui_donation_code = ''
     ////////////////////////////////////////////////////////////   
-    var _fxamount = 0
+    var _fxamount = 0.0
     ////////////////////////////////////////////////////////////
     //NE-451 進金生教育訓練-測試問題
     //檢查需相同幣別及匯率需一致
-    var _gw_check_currency_and_exchangerate = ''
-    
+     
    	invoiceDetailsArrayObject.forEach(function (_result){
    	  log.debug({title: 'createInvoiceDetails - result', details: _result}) 
 
@@ -1190,7 +1191,7 @@ define([
         _sales_order_number = _result.createdfrom[0].text //sales order  #42
       }
       //NE-451 進金生教育訓練-測試問題 No.2
-      if (_mainline == '*') _fxamount += _result['fxamount']   
+      if (_mainline == '*') _fxamount += stringutility.convertToFloat(_result['fxamount'])  
 
       var _amount = stringutility.convertToFloat(_result.amount) //31428.57(未稅)
       //20210707 walter modify
@@ -1333,7 +1334,7 @@ define([
       
       var _exchangerate = _result['exchangerate']   
       //20231229 Currency.exchangerate 匯率
-      var _item_exchangerate = _result['Currency.exchangerate']
+      //var _item_exchangerate = _result['Currency.exchangerate']
       //NE-451 進金生教育訓練-測試問題 - No.3
       if (_currency_text != 'TWD') {
           //_item_memo += 'Price: '+_item_exchangerate 
@@ -1352,6 +1353,20 @@ define([
 	      _gw_gui_main_memo +='|'+'幣別 :'+_currency_text
 	      _gw_gui_main_memo +='|'+'匯率 :'+_exchangerate
 	      _gw_gui_main_memo +='|'+'外幣總金額(含稅) :' + _fxamount
+      }
+      
+      var _index_currency_text = _currency_text+_exchangerate
+      log.debug('invoice index_currency_text', _index_currency_text)
+      if (_gw_check_currency_and_exchangerate.length == 0) {
+    	  _gw_check_currency_and_exchangerate = _index_currency_text
+      } else {
+    	  var _chk_result = _gw_check_currency_and_exchangerate.indexOf(_index_currency_text)
+    	  log.debug('invoice chk_result', _chk_result)
+    	  if (_chk_result == -1){
+	    	  var _check_currency_field = form.getField({id: 'custpage_check_currency_field'})
+	    	  _check_currency_field.defaultValue = 'F'
+	    	  log.debug('invoice check_currency_field.defaultValue', _check_currency_field.defaultValue)	  
+    	  }
       }
        
       if (_itemtype === 'Discount') {
@@ -2389,10 +2404,24 @@ define([
       }
       //20231229 exchangerate 匯率
       var _exchangerate = _result['Currency.exchangerate']
-      if (_currency_text == 'USD') {
+      if (_currency_text != 'TWD') {
           //_item_memo += 'Price: '+_exchangerate
     	  //_item_memo += 'Price: '+ _result['fxrate']  
       }  
+      
+      var _index_currency_text = _currency_text+_exchangerate
+      log.debug('credit memo index_currency_text', _index_currency_text)
+      if (_gw_check_currency_and_exchangerate.length == 0) {
+    	  _gw_check_currency_and_exchangerate = _index_currency_text
+      } else {
+    	  var _chk_result = _gw_check_currency_and_exchangerate.indexOf(_index_currency_text) 
+    	  log.debug('credit memo chk_result.defaultValue', _chk_result)
+    	  if (_chk_result == -1){
+	    	  var _check_currency_field = form.getField({id: 'custpage_check_currency_field'})
+	    	  _check_currency_field.defaultValue = 'F'
+	    	  log.debug('credit memo check_currency_field.defaultValue', _check_currency_field.defaultValue)
+    	  } 
+      } 
 
       if (_itemtype === 'Discount') {
         //20210908 walter modify => 折扣項目作進Item, 不另外處理
@@ -2987,6 +3016,17 @@ define([
     _hiddenfield.updateDisplayType({
       displayType: serverWidget.FieldDisplayType.HIDDEN
     })
+    //NE-451 進金生教育訓練-測試問題
+    var _hiddenCheckCurrencyField = form.addField({
+        id: 'custpage_check_currency_field',
+        type: serverWidget.FieldType.TEXT,
+        label: 'HIDDEN'
+    })
+    _hiddenCheckCurrencyField.updateDisplayType({
+      displayType: serverWidget.FieldDisplayType.HIDDEN
+    })
+    _hiddenCheckCurrencyField.defaultValue = 'T'
+    
     //紀錄可扣餘額
     var _hidden_deposit_voucher_field = form.addField({
       id: 'custpage_deposit_voucher_hiddent_listid',
@@ -3084,8 +3124,9 @@ define([
     //做畫面-END
     ///////////////////////////////////////////////////////////////////////////////////////////
 
-    //form.clientScriptModulePath = './gw_invoice_ui_event_v2.js'
+    //form.clientScriptModulePath = './gw_invoice_ui_event_test.js'
     form.clientScriptModulePath = './gw_invoice_ui_event.js'
+    	
     context.response.writePage(form)
   } //End onRequest
 
