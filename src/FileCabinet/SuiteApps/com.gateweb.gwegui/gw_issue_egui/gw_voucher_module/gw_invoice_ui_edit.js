@@ -1336,23 +1336,33 @@ define([
       //20231229 Currency.exchangerate 匯率
       //var _item_exchangerate = _result['Currency.exchangerate']
       //NE-451 進金生教育訓練-測試問題 - No.3
+      if (_gw_gui_main_memo.length == 0) {
+    	  _gw_gui_main_memo = '更正發票請於次月7日前提出，逾期恕不受理，謝謝合作！'
+      }else{
+    	  _gw_gui_main_memo += '|更正發票請於次月7日前提出，逾期恕不受理，謝謝合作！'
+      } 
       if (_currency_text != 'TWD') {
           //_item_memo += 'Price: '+_item_exchangerate 
-          _item_memo += 'Price: '+ _result['fxrate']  
+          //_item_memo += 'Price: '+ _result['fxrate']  
+          _item_memo += 'U/P '+_currency_text+' '+ _result['fxrate']  
      	           
 	      //NE-374 發票總備註內容 20240202 
 	      //總備註:
 	      //幣別 :
 	      //匯率 :
 	      //外幣總金額(含稅): 
+          //更正發票請於次月7日前提出，逾期恕不受理，謝謝合作！
+          /**
 	      if (_gw_gui_main_memo.length == 0){
 	    	  _gw_gui_main_memo = '總備註:'
 	      } else {
 	    	  _gw_gui_main_memo += '|'+'總備註:'
-	      }  
-	      _gw_gui_main_memo +='|'+'幣別 :'+_currency_text
+	      }
+          */
+          _gw_gui_main_memo += '|'+'總備註:'
+	      //_gw_gui_main_memo +='|'+'幣別 :'+_currency_text
 	      _gw_gui_main_memo +='|'+'匯率 :'+_exchangerate
-	      _gw_gui_main_memo +='|'+'外幣總金額(含稅) :' + _fxamount
+	      _gw_gui_main_memo +='|'+_currency_text+'總金額(含稅) :' + _fxamount 
       }
       
       var _index_currency_text = _currency_text+_exchangerate

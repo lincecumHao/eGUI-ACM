@@ -1005,8 +1005,9 @@ define([
       height: _field_height,
       width: _field_width,
     })
-    //default calue=2行
-    _selectLinePrintSpaceField.defaultValue = '2'    
+    //default calue=3行
+    //NE-451 進金生教育訓練-測試問題
+    _selectLinePrintSpaceField.defaultValue = '3'    
     	
 	//是否含下載錯誤資料PDF
 	var _errorLinePrintField = form.addField({

@@ -168,7 +168,10 @@ define([
           ///////////////////////////////////////////////////////////////////////////////////////
           var _need_upload_egui_status = true
           if (_need_upload_egui_mig == 'NONE') _need_upload_egui_status = false
-
+          
+          //NE-451 進金生教育訓練-測試問題
+          var _line_print_space = '3'
+        	  
           _xmlFileObjects.push({
             filename: _file_name + '.xml',
             xml: _xml,
@@ -177,7 +180,10 @@ define([
             extramemo: _extra_memo,
             uploadDocument: _need_upload_egui_status,
             reprint: _reprint,
+            linePrintSpace: _line_print_space
           })
+           
+          
           ///////////////////////////////////////////////////////////////////////////////////////
           //Update MAIN print pdf flag is true _apply_id
           console.log('Pass xmlFileObjects=>' + JSON.stringify(_xmlFileObjects))
