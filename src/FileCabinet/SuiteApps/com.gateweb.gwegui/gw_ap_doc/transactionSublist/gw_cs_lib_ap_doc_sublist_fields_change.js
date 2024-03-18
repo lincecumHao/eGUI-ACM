@@ -11,7 +11,8 @@ define([
   '../application/gw_service_ap_doc_status_options',
   '../application/moment-with-locales',
   '../application/gw_service_ap_doc_apply_period',
-  '../application/gw_lib_wrapper'
+  '../application/gw_lib_wrapper',
+  '../application/gw_service_ap_doc_apply_month',
 ], function (
   search,
   runtime,
@@ -25,7 +26,8 @@ define([
   apDocStatusService,
   moment,
   applyPeriodService,
-  wrapperLib
+  wrapperLib,
+  applyMonthService
 ) {
   /**
    * Module Description...
@@ -136,12 +138,23 @@ define([
     var currentApplyPeriodValue = getCurrencySublistFieldValue(
       apDocFields.fields.applyPeriod.id
     )
+    var currentApplyMonthValue = getCurrencySublistFieldValue(
+        apDocFields.fields.applyMonth.id
+    )
     if (!currentApplyPeriodValue || currentApplyPeriodValue === '') {
       var applyPeriod = applyPeriodService.convertGuiPeriod(moment())
       var applyPeriodRecord = applyPeriodService.getRecordByValue(applyPeriod)
       setSublistValue(
         apDocFields.fields.applyPeriodSelect.id,
         applyPeriodRecord.id
+      )
+    }
+    if (!currentApplyMonthValue || currentApplyMonthValue === '') {
+      var applyMonth = applyMonthService.convertToApplyMonth()
+      var applyMonthRecordId = applyMonthService.getRecordByValue(applyMonth)
+      setSublistValue(
+          apDocFields.fields.applyMonth.id,
+          applyMonthRecordId
       )
     }
   }

@@ -146,6 +146,10 @@ define([], function () {
       id: 'custrecord_gw_ap_doc_acct_period',
       maxLength: 6
     },
+    applyMonth: {
+      name: 'applyMonth',
+      id: 'custrecord_gw_ap_doc_apply_month'
+    },
     source: {
       name: 'source',
       id: 'custrecord_gw_ap_doc_source',

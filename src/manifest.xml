@@ -1,24 +1,34 @@
 <manifest projecttype="SUITEAPP">
-    <publisherid>com.gateweb</publisherid>
-    <projectid>gwegui</projectid>
-    <projectname>GW Taiwan EGUI</projectname>
-    <projectversion>1.0.0</projectversion>
-    <frameworkversion>1.0</frameworkversion>
-    <dependencies>
-        <features>
-            <feature required="true">SERVERSIDESCRIPTING</feature>
-            <feature required="true">CUSTOMRECORDS</feature>
-            <feature required="true">CLASSES</feature>
-            <feature required="true">DEPARTMENTS</feature>
-            <feature required="true">ACCOUNTING</feature>
-            <feature required="true">SUBSIDIARIES</feature>
-            <feature required="true">CRM</feature>
-            <feature required="false">LOCATIONS</feature>
-            <feature required="false">MULTILANGUAGE</feature>
-            <feature required="false">RECEIVABLES</feature>
-            <feature required="false">EXPREPORTS</feature>
-            <feature required="false">PAYABLES</feature>
-            <feature required="false">MULTILOCINVT</feature>
-        </features>
-    </dependencies>
+  <publisherid>com.gateweb</publisherid>
+  <projectid>gwegui</projectid>
+  <projectname>GW Taiwan EGUI</projectname>
+  <projectversion>1.0.0</projectversion>
+  <frameworkversion>1.0</frameworkversion>
+  <dependencies>
+    <features>
+      <feature required="true">SERVERSIDESCRIPTING</feature>
+      <feature required="true">CUSTOMRECORDS</feature>
+      <feature required="true">CLASSES</feature>
+      <feature required="true">DEPARTMENTS</feature>
+      <feature required="true">ACCOUNTING</feature>
+      <feature required="true">SUBSIDIARIES</feature>
+      <feature required="true">CRM</feature>
+      <feature required="false">MULTILANGUAGE</feature>
+      <feature required="false">RECEIVABLES</feature>
+      <feature required="false">EXPREPORTS</feature>
+      <feature required="false">PAYABLES</feature>
+      <feature required="false">MULTILOCINVT</feature>
+      <feature required="true">LOCATIONS</feature>
+      <feature required="false">CUSTOMSEGMENTS</feature>
+      <feature required="false">EXTREMELIST</feature>
+      <feature required="false">MAILMERGE</feature>
+    </features>
+    <applications>
+      <application id="com.gateweb.gwtax">
+        <objects>
+          <object>customrecord_gw_apply_month_options</object>
+        </objects>
+      </application>
+    </applications>
+  </dependencies>
 </manifest>
