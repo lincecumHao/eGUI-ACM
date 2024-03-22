@@ -239,7 +239,7 @@
       <searchcomparefield></searchcomparefield>
       <searchdefault></searchdefault>
       <searchlevel>2</searchlevel>
-      <selectrecordtype>[appid=com.gateweb.gwtax, scriptid=customrecord_gw_apply_month_options]</selectrecordtype>
+      <selectrecordtype>[scriptid=customrecord_gw_apply_month_options]</selectrecordtype>
       <showinlist>T</showinlist>
       <sourcefilterby></sourcefilterby>
       <sourcefrom></sourcefrom>
