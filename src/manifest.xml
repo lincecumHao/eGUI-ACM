@@ -23,12 +23,5 @@
       <feature required="false">EXTREMELIST</feature>
       <feature required="false">MAILMERGE</feature>
     </features>
-    <applications>
-      <application id="com.gateweb.gwtax">
-        <objects>
-          <object>customrecord_gw_apply_month_options</object>
-        </objects>
-      </application>
-    </applications>
   </dependencies>
 </manifest>
