@@ -83,21 +83,27 @@ define([
     }
     /**
     sendByVoucherId(subject, voucherId) {
+      log.audit({title: 'sendByVoucherId', details: 'start...'})
+      log.audit({title: 'sendByVoucherId - subject|voucherId', details: subject + '|' + voucherId})
       var eguiObj = gwVoucherDao.getGuiByVoucherId(voucherId)
       var eguiObjUpdated = updateEguiObj(eguiObj)
-      var emailContentObj = {
-        author: this.getAuthor(eguiObjUpdated),
-        body: this.getEmailContent(eguiObjUpdated),
-        recipients: this.getRecipients(eguiObjUpdated),
-        subject: this.getSubject(subject, eguiObjUpdated)
-      }
+      if(this.getAuthor(eguiObjUpdated)) {
+        var emailContentObj = {
+          author: this.getAuthor(eguiObjUpdated),
+          body: this.getEmailContent(eguiObjUpdated),
+          recipients: this.getRecipients(eguiObjUpdated),
+          subject: this.getSubject(subject, eguiObjUpdated)
+        }
 
-      log.debug({ title: 'isB2B', details: isB2B(eguiObjUpdated.buyerTaxId) })
-      log.debug({ title: 'buyerTaxId', details: eguiObjUpdated.buyerTaxId })
-      if (isB2B(eguiObjUpdated.buyerTaxId)) {
-        emailContentObj.attachments = this.getAttachmentFiles(eguiObjUpdated)
+        log.debug({ title: 'isB2B', details: isB2B(eguiObjUpdated.buyerTaxId) })
+        log.debug({ title: 'buyerTaxId', details: eguiObjUpdated.buyerTaxId })
+        if (isB2B(eguiObjUpdated.buyerTaxId)) {
+          emailContentObj.attachments = this.getAttachmentFiles(eguiObjUpdated)
+        }
+        return this.send(subject, emailContentObj)
+      } else {
+        log.audit({title: 'in sendByVoucherId func', details: 'do not send email because author is missing'})
       }
-      return this.send(subject, emailContentObj)
     }
     */
     
