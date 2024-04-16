@@ -21,6 +21,13 @@ define(['../../library/ramda.min'], function (ramda) {
             name: 'mainline',
             join: '',
         },
+        taxline: {
+            id: 'taxline',
+            sourceField: 'taxline',
+            outputField: 'taxline',
+            name: 'taxline',
+            join: '',
+        },
         trandate: {
             id: 'trandate',
             sourceField: 'trandate',
