@@ -30,8 +30,7 @@ define([], () => {
      * @since 2015.2
      */
     const beforeLoad = (scriptContext) => {
-        if (scriptContext.type === scriptContext.UserEventType.CREATE
-            || scriptContext.type === scriptContext.UserEventType.EDIT) addMakeCopyBtn(scriptContext)
+        if (scriptContext.type === scriptContext.UserEventType.EDIT) addMakeCopyBtn(scriptContext)
     }
 
     /**
