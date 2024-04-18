@@ -65,7 +65,7 @@ define(['../application/gw_service_ap_doc_gui_number'], function (
 
   function isGuiTrackValidationRequired(docType) {
     var docTypeInt = docType ? parseInt(docType) : 0
-    var guiTrackValidationRequiredDocType = [21, 22, 25]
+    var guiTrackValidationRequiredDocType = [21, 22, 25, 26]
     return guiTrackValidationRequiredDocType.indexOf(parseInt(docTypeInt)) > -1
   }
 
