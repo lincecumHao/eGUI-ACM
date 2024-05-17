@@ -243,7 +243,7 @@ define(['../../library/ramda.min'], function (ramda) {
             sourcedField: true,
             sourceRecord: 'customer',
             sourceFieldId: 'custentity_gw_gui_address',
-            needToClearForCreditMemo: true
+            needToClearForCreditMemo: false
         },
         custbody_gw_gui_title: {
             id: 'custbody_gw_gui_title',
@@ -253,7 +253,7 @@ define(['../../library/ramda.min'], function (ramda) {
             sourcedField: true,
             sourceRecord: 'customer',
             sourceFieldId: 'custentity_gw_gui_title',
-            needToClearForCreditMemo: true
+            needToClearForCreditMemo: false
         },
         custbody_gw_tax_id_number: {
             id: 'custbody_gw_tax_id_number',
@@ -263,7 +263,7 @@ define(['../../library/ramda.min'], function (ramda) {
             sourcedField: true,
             sourceRecord: 'customer',
             sourceFieldId: 'custentity_gw_tax_id_number',
-            needToClearForCreditMemo: true
+            needToClearForCreditMemo: false
         }
     }
 

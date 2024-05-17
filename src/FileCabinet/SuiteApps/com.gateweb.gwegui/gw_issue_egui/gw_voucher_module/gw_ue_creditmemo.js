@@ -29,7 +29,7 @@ define(['../../gw_library/gw_lib_transaction_util'], (gwLibTransactionUtil) => {
             })
             if(gwLibTransactionUtil.isNeedToClearCreditMemoEGUIData(scriptContext)) {
                 gwLibTransactionUtil.clearValueForCreditMemo(scriptContext)
-                gwLibTransactionUtil.setSourceFieldValue(scriptContext)
+                // gwLibTransactionUtil.setSourceFieldValue(scriptContext)
             }
         } catch (e) {
             log.error({
