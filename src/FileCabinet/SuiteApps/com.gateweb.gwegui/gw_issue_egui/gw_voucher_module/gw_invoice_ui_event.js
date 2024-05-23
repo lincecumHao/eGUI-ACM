@@ -864,6 +864,16 @@ define([
       
   }
 
+  function getAllowanceDefaultUploadOption() {
+    var codeMapping = {
+      'DU': 'ALL',
+      'NU': 'NONE',
+      'RP': 'RETRIEVE'
+    }
+
+    return undefined;
+  }
+
   function showCreditMemoForm(
     mandatoryFlag,
     invoice_length,
@@ -937,6 +947,15 @@ define([
           text: '折讓單待回收'
         })
       }
+
+      var allowanceDefaultUploadOption = getAllowanceDefaultUploadOption()
+
+      _current_record.setValue({
+        fieldId: 'custpage_allowance_log_type',
+        value: allowanceDefaultUploadOption,
+        ignoreFieldChange: true
+      })
+
     } catch (e) {
       console.log(e.name + ':' + e.message)
     }
