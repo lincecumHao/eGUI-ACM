@@ -153,8 +153,8 @@ define([
         if (stringutility.trim(_invoice_todo_list) !== '') {
           var _obj = {
             internalid: _internalid,
-            openType: _voucher_open_type, //SINGLE-INVOICE-SCHEDULE
-            invoiceType: _invoice_type,   //CANCEL
+            // openType: _voucher_open_type, //SINGLE-INVOICE-SCHEDULE
+            // invoiceType: _invoice_type,   //CANCEL
             reason: _void_comment,
             applyId: _invoice_todo_list,
           }
