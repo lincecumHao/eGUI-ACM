@@ -14,5 +14,8 @@
         <path>~/FileCabinet/SuiteApps/com.gateweb.gwegui/gw_issue_egui/services/email/eguiEmailTemplate.hbs</path>
         <path>~/FileCabinet/SuiteApps/com.gateweb.gwegui/gw_issue_egui_job/services/email/eguiEmailTemplate.ftl</path>
         <path>~/FileCabinet/SuiteApps/com.gateweb.gwegui/gw_issue_egui_job/services/email/eguiEmailTemplate.hbs</path>
+        <path>~/FileCabinet/SuiteApps/com.gateweb.gwegui/gw_ap_doc/transactionSublist/gw_cs_trans_ap_doc_sublist.js</path>
+        <path>~/FileCabinet/SuiteApps/com.gateweb.gwegui/gw_issue_egui/gw_lock_record/gw_cs_lock_record.js</path>
+        <path>~/FileCabinet/SuiteApps/com.gateweb.gwegui/gw_ap_doc/ap_doc_custom_record/gw_cs_ap_doc.js</path>
     </apply>
 </preference>
