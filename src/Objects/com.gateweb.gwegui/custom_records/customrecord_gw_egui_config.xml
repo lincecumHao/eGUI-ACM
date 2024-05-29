@@ -782,9 +782,52 @@
       <storevalue>T</storevalue>
       <subtab></subtab>
     </customrecordcustomfield>
+    <customrecordcustomfield scriptid="custrecord_gw_conf_allowance_upload_opt">
+      <accesslevel>2</accesslevel>
+      <allowquickadd>F</allowquickadd>
+      <applyformatting>F</applyformatting>
+      <checkspelling>F</checkspelling>
+      <defaultchecked>F</defaultchecked>
+      <defaultselection></defaultselection>
+      <defaultvalue></defaultvalue>
+      <description></description>
+      <displayheight></displayheight>
+      <displaytype>NORMAL</displaytype>
+      <displaywidth></displaywidth>
+      <dynamicdefault></dynamicdefault>
+      <encryptatrest>F</encryptatrest>
+      <fieldtype>SELECT</fieldtype>
+      <globalsearch>F</globalsearch>
+      <help>如有設定, 會依照設定的值來判斷折讓單開立之後的流程&#xd;
+        - DU : 直接上傳&#xd;
+        - RP : 回收&#xd;
+        - NU : 不上傳</help>
+      <isformula>F</isformula>
+      <ismandatory>F</ismandatory>
+      <isparent>F</isparent>
+      <label>Allowance Upload Option</label>
+      <linktext></linktext>
+      <maxlength></maxlength>
+      <maxvalue></maxvalue>
+      <minvalue></minvalue>
+      <onparentdelete>NO_ACTION</onparentdelete>
+      <parentsubtab></parentsubtab>
+      <rolerestrict>F</rolerestrict>
+      <searchcomparefield></searchcomparefield>
+      <searchdefault></searchdefault>
+      <searchlevel>2</searchlevel>
+      <selectrecordtype>[scriptid=customrecord_gw_allowance_upload_option]</selectrecordtype>
+      <showinlist>T</showinlist>
+      <sourcefilterby></sourcefilterby>
+      <sourcefrom></sourcefrom>
+      <sourcelist></sourcelist>
+      <storevalue>T</storevalue>
+      <subtab></subtab>
+    </customrecordcustomfield>
   </customrecordcustomfields>
   <instances>
     <instance scriptid="val_9598_2130928_280">
+      <custrecord_gw_conf_allowance_upload_opt></custrecord_gw_conf_allowance_upload_opt>
       <custrecord_gw_conf_rich_process>F</custrecord_gw_conf_rich_process>
       <custrecord_gw_conf_rich_base_url>https://sstest.gwis.com.tw</custrecord_gw_conf_rich_base_url>>
       <custrecord_gw_conf_egui_class></custrecord_gw_conf_egui_class>
@@ -808,6 +851,7 @@
       <name>測試設定-default</name>
     </instance>
     <instance scriptid="val_9599_2130928_608">
+      <custrecord_gw_conf_allowance_upload_opt></custrecord_gw_conf_allowance_upload_opt>
       <custrecord_gw_conf_rich_process>F</custrecord_gw_conf_rich_process>
       <custrecord_gw_conf_rich_base_url>https://ss.gwis.com.tw</custrecord_gw_conf_rich_base_url>>
       <custrecord_gw_conf_egui_class></custrecord_gw_conf_egui_class>
