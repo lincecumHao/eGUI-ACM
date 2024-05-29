@@ -809,7 +809,7 @@
     </instance>
     <instance scriptid="val_9599_2130928_608">
       <custrecord_gw_conf_rich_process>F</custrecord_gw_conf_rich_process>
-      <custrecord_gw_conf_rich_base_url></custrecord_gw_conf_rich_base_url>>
+      <custrecord_gw_conf_rich_base_url>https://ss.gwis.com.tw</custrecord_gw_conf_rich_base_url>>
       <custrecord_gw_conf_egui_class></custrecord_gw_conf_egui_class>
       <custrecord_gw_conf_egui_department></custrecord_gw_conf_egui_department>
       <custrecord_gw_conf_default_issue_sts></custrecord_gw_conf_default_issue_sts>
