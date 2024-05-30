@@ -946,6 +946,7 @@ define([
     _selectVoucherOpenType.addSelectOption({
       value: 'SINGLE-EGUI-SCHEDULE',
       text: '開立發票',
+      isSelected: true
     })
     _selectVoucherOpenType.updateLayoutType({
       layoutType: serverWidget.FieldLayoutType.OUTSIDE,
@@ -1059,6 +1060,7 @@ define([
     _selectUploadType.addSelectOption({
       value: 'ALL',
       text: '上傳-發票及折讓單',
+      isSelected: true
     })
     ////////////////////////////////////////////////////////////////
     _selectUploadType.updateLayoutType({
