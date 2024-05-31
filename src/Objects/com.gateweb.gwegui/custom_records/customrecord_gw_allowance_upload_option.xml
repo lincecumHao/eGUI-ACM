@@ -84,12 +84,12 @@
     <instance scriptid="val_112055_td2905095_289">
       <custrecord_gw_auo_option_code>DU</custrecord_gw_auo_option_code>
       <isinactive>F</isinactive>
-      <name>直接上傳</name>
+      <name>上傳</name>
     </instance>
     <instance scriptid="val_112056_td2905095_560">
       <custrecord_gw_auo_option_code>RP</custrecord_gw_auo_option_code>
       <isinactive>F</isinactive>
-      <name>回收</name>
+      <name>折讓單待回收</name>
     </instance>
     <instance scriptid="val_112057_td2905095_147">
       <custrecord_gw_auo_option_code>NU</custrecord_gw_auo_option_code>
