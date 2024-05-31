@@ -865,13 +865,39 @@ define([
   }
 
   function getAllowanceDefaultUploadOption() {
+    console.log('getAllowanceDefaultUploadOption - runtime.accountId', runtime.accountId)
+    var defaultAllowanceUploadOptionCode = ''
+    var recordType = 'customrecord_gw_egui_config'
+    var filters = []
+    filters.push(['custrecord_gw_conf_ns_acct_id', 'is', runtime.accountId])
+    var columns = []
+    columns.push('custrecord_gw_conf_ns_acct_id')
+    columns.push('custrecord_gw_conf_allowance_upload_opt')
+    columns.push(search.createColumn({
+      name: 'custrecord_gw_auo_option_code',
+      join: 'CUSTRECORD_GW_CONF_ALLOWANCE_UPLOAD_OPT'
+    }))
+    var customrecord_gw_egui_configSearchObj = search.create({
+      type: recordType,
+      filters: filters,
+      columns: columns
+    });
+    customrecord_gw_egui_configSearchObj.run().each(function(result){
+      // .run().each has a limit of 4,000 results
+      defaultAllowanceUploadOptionCode = result.getValue({
+        name: 'custrecord_gw_auo_option_code',
+        join: 'CUSTRECORD_GW_CONF_ALLOWANCE_UPLOAD_OPT'
+      })
+      return true;
+    });
+    console.log('getAllowanceDefaultUploadOption - defaultAllowanceUploadOptionCode', defaultAllowanceUploadOptionCode)
+
     var codeMapping = {
       'DU': 'ALL',
       'NU': 'NONE',
       'RP': 'RETRIEVE'
     }
-
-    return undefined;
+    return defaultAllowanceUploadOptionCode ? codeMapping[defaultAllowanceUploadOptionCode] : ''
   }
 
   function showCreditMemoForm(
