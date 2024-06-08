@@ -8,7 +8,7 @@
   <allownumberingoverride>F</allownumberingoverride>
   <allowquickadd>F</allowquickadd>
   <allowquicksearch>F</allowquicksearch>
-  <allowuiaccess>T</allowuiaccess>
+  <allowuiaccess>F</allowuiaccess>
   <description></description>
   <enabledle>T</enabledle>
   <enablekeywords>T</enablekeywords>
