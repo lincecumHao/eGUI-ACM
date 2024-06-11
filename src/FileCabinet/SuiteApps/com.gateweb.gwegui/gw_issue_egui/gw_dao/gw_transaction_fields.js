@@ -504,6 +504,13 @@ define(['../../library/ramda.min'], function (ramda) {
             name: 'custcol_ntt_td_grade',
             join: '',
         }, 
+        'custcol_ntt_cpn_item': {
+            id: 'custcol_ntt_cpn_item',
+            sourceField: 'custcol_ntt_cpn_item',
+            outputField: 'custcol_ntt_cpn_item',
+            name: 'custcol_ntt_cpn_item',
+            join: '',
+        }, 
         custcol_ntt_iv_itemname: {
             id: 'custcol_ntt_iv_itemname',
             sourceField: 'custcol_ntt_iv_itemname',
