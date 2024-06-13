@@ -501,6 +501,7 @@ define([
         context.request.parameters.custpage_assignlog_reason
 
       //////////////////////////////////////////////////////////////////////////////////////////////////
+      if(!_businessNo) return
       var _businessNoField = form.getField({
         id: 'custpage_businessno',
       })

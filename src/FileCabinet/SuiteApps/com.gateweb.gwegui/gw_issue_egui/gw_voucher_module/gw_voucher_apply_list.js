@@ -542,6 +542,7 @@ define([
       var _select_apply_enddate =
         context.request.parameters.custpage_select_apply_enddate
       ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      if(!_select_businessno) return
       var _businessnoField = form.getField({
         id: 'custpage_businessno',
       })

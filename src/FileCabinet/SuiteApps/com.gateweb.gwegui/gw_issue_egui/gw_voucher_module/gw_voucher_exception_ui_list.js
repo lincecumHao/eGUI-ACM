@@ -891,6 +891,7 @@ define([
         context.request.parameters.custpage_select_voucher_type
 
       ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      if(!_select_businessno) return
       var _businessnoField = form.getField({
         id: 'custpage_businessno',
       })

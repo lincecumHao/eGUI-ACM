@@ -748,14 +748,14 @@ define([
       id: 'custpage_manual_voucher_button',
       label: '維護發票',
       functionName:
-        'forwardToManualEdit("customscript_gw_invoice_ui_manual_edit","customdeploy_gw_invoice_ui_manual_edit")',
+        'forwardToManualEdit("customscript_gw_invoice_ui_manual_edit","customdeploy_gw_invoice_ui_manual_edit", "maintain")',
     })
     
     form.addButton({
       id: 'custpage_manual_import_button',
       label: '匯入發票',
       functionName:
-        'forwardToManualEdit("customscript_gw_manualegui_ui_import","customdeploy_gw_manualegui_ui_import")',
+        'forwardToManualEdit("customscript_gw_manualegui_ui_import","customdeploy_gw_manualegui_ui_import", "import")',
     })
 
     form.addButton({
@@ -806,6 +806,7 @@ define([
       log.debug('Deployment Id: ', _deploymentId)
 
       ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      if(!_select_businessno) return
       var _businessnoField = form.getField({
         id: 'custpage_businessno',
       })

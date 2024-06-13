@@ -431,6 +431,7 @@ define([
       var _select_invoice_type = context.request.parameters.custpage_select_invoice_type
       
       //////////////////////////////////////////////////////////////////////////////////////////////////
+      if(!_businessNo) return
       var _businessNoField = form.getField({
         id: 'custpage_businessno',
       })
