@@ -1230,7 +1230,7 @@ define(['N/format', 'N/record', 'N/search'], function (format, record, search) {
         search.Operator.IS,
         subsidiary
       ])
-      _filterArray.push('or')
+      _filterArray.push('AND')
       _filterArray.push([
         'custrecord_gw_business_entity_role_list',
         search.Operator.ANYOF,
