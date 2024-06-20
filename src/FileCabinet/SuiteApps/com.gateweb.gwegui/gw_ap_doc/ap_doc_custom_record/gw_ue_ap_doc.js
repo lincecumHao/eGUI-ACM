@@ -1,4 +1,8 @@
-define([], () => {
+define([
+    'N/runtime'
+], (
+    runtime
+) => {
   /**
    * Module Description...
    *
@@ -13,6 +17,14 @@ define([], () => {
    * @NScriptType UserEventScript
    */
   var exports = {}
+  const DO_NOT_ALLOW_VIA_USER_INTERFACE_ERROR_MESSAGE = 'Do not allow to create/edit 進項發票或憑證 via UserInterface, please go back to bill record to enter 進項發票或憑證'
+
+  function isViaUserInterface(context) {
+    return (context.type === context.UserEventType.CREATE
+        || context.type === context.UserEventType.EDIT
+        || context.type === context.UserEventType.COPY)
+        && runtime.executionContext === runtime.ContextType.USER_INTERFACE
+  }
 
   /**
    * beforeLoad event handler; executes whenever a read operation occurs on a record, and prior
@@ -27,7 +39,17 @@ define([], () => {
    */
   function beforeLoad(context) {
     // TODO
-    log.debug({ title: 'beforeLoad', details: context.type })
+    log.debug({
+      title: 'beforeLoad',
+      details: {
+        contextType: context.type,
+        runtimeExecutionContext: runtime.executionContext
+      }
+    })
+
+    if(isViaUserInterface(context)) {
+      throw DO_NOT_ALLOW_VIA_USER_INTERFACE_ERROR_MESSAGE
+    }
   }
 
   /**
