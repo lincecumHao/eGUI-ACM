@@ -329,6 +329,8 @@ define([
    */
   function salesAmtChanged(context) {
     var value = getCurrencySublistFieldValue(context.fieldId)
+    var calculatedTaxAmt = Math.round(value * 0.05)
+    setTaxAmt(calculatedTaxAmt)
     var taxAmt = getCurrencySublistFieldValue(apDocFields.fields.taxAmt.id)
     var totalAmt = value + taxAmt
     setTotalAmt(totalAmt)
@@ -367,6 +369,10 @@ define([
 
   function setTotalAmt(value) {
     setSublistValue(apDocFields.fields.totalAmt.id, value)
+  }
+
+  function setTaxAmt(value) {
+    setSublistValue(apDocFields.fields.taxAmt.id, value)
   }
 
   /**
