@@ -223,6 +223,12 @@ define([
     var recordData = getRecordData(context)
     var errorObject = {}
 
+    console.log('validateLine-recordData', recordData)
+    if(recordData[apDocFields.fields.docType.id] === '') {
+      alert('Please enter a value for 憑證格式代號')
+      return false
+    }
+
     Object.keys(recordData).forEach(function (fieldId) {
       var ignoreIdFields = ['id']
       if (ignoreIdFields.indexOf(fieldId) === -1) {
