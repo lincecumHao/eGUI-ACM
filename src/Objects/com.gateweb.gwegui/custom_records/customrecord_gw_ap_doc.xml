@@ -4,7 +4,7 @@
   <allowinlinedeleting>T</allowinlinedeleting>
   <allowinlinedetaching>T</allowinlinedetaching>
   <allowinlineediting>T</allowinlineediting>
-  <allowmobileaccess>T</allowmobileaccess>
+  <allowmobileaccess>F</allowmobileaccess>
   <allownumberingoverride>F</allownumberingoverride>
   <allowquickadd>F</allowquickadd>
   <allowquicksearch>F</allowquicksearch>
@@ -21,7 +21,7 @@
   <icon></icon>
   <iconbuiltin>T</iconbuiltin>
   <iconindex></iconindex>
-  <includeinsearchmenu>T</includeinsearchmenu>
+  <includeinsearchmenu>F</includeinsearchmenu>
   <includename>F</includename>
   <isinactive>F</isinactive>
   <isordered>F</isordered>
@@ -565,7 +565,7 @@
       <applyformatting>F</applyformatting>
       <checkspelling>F</checkspelling>
       <defaultchecked>F</defaultchecked>
-      <defaultselection></defaultselection>
+      <defaultselection>[scriptid=customrecord_gw_ap_doc_tax_type_option.val_6500_2130928_959]</defaultselection>
       <defaultvalue></defaultvalue>
       <description></description>
       <displayheight></displayheight>
@@ -799,7 +799,7 @@
       <applyformatting>F</applyformatting>
       <checkspelling>F</checkspelling>
       <defaultchecked>F</defaultchecked>
-      <defaultselection></defaultselection>
+      <defaultselection>[scriptid=customrecord_gw_ap_doc_deduct_option.val_6506_2130928_799]</defaultselection>
       <defaultvalue></defaultvalue>
       <description></description>
       <displayheight></displayheight>
@@ -1005,15 +1005,15 @@
       <fieldtype>SELECT</fieldtype>
       <globalsearch>F</globalsearch>
       <help>銷項出口零稅率時，必填1~9&#xd;
-              適用零稅率規定為4、5、6、7&#xd;
-              1：16碼必填，buyer不可填&#xd;
-              2：同1&#xd;
-              3：16碼不可填，buyer不可填&#xd;
-              4：16碼必填，buyer必填&#xd;
-              5、6：不檢查&#xd;
-              7：16碼必填，buyer不可填&#xd;
-              8、9：必非經海關，buyer不填
-          </help>
+            適用零稅率規定為4、5、6、7&#xd;
+            1：16碼必填，buyer不可填&#xd;
+            2：同1&#xd;
+            3：16碼不可填，buyer不可填&#xd;
+            4：16碼必填，buyer必填&#xd;
+            5、6：不檢查&#xd;
+            7：16碼必填，buyer不可填&#xd;
+            8、9：必非經海關，buyer不填
+        </help>
       <isformula>F</isformula>
       <ismandatory>F</ismandatory>
       <isparent>F</isparent>
@@ -1170,13 +1170,13 @@
       <fieldtype>TEXT</fieldtype>
       <globalsearch>F</globalsearch>
       <help>資料來源(30碼)&#xd;
-              關網網頁上操作紀錄Source：&#xd;
-              1.匯入者公司統編(網頁Excel檔案匯入)&#xd;
-              2.匯入者公司統編-Modify(單筆修改)&#xd;
-              3.匯入者公司統編-Add(單筆新增)&#xd;
-              API串接紀錄Source：&#xd;
-              EX：PcHome/Oracle
-          </help>
+            關網網頁上操作紀錄Source：&#xd;
+            1.匯入者公司統編(網頁Excel檔案匯入)&#xd;
+            2.匯入者公司統編-Modify(單筆修改)&#xd;
+            3.匯入者公司統編-Add(單筆新增)&#xd;
+            API串接紀錄Source：&#xd;
+            EX：PcHome/Oracle
+        </help>
       <isformula>F</isformula>
       <ismandatory>F</ismandatory>
       <isparent>F</isparent>
