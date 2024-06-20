@@ -1810,8 +1810,7 @@ define([
         return requestParamArray
     }
 
-    function syncVoucherThroughRich(richBaseURL, requestParam) {
-        const REQUEST_TOKEN = `Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJzZWN1cmUtYXBpIiwiYXVkIjoic2VjdXJlLWFwcCIsInN1YiI6Ijg2NTA5MDgwIiwiZXhwIjoxNzA2ODY1Nzg4LCJyb2wiOlsiUk9MRV9BRE1JTiJdfQ.fvSw7HUE2lFp2VVV_DPA2Bvx3eahQzqErVC7LE5jgGSMmX3q5ZaWPCSMwBTotLG6DaDwlIYausLHao6mR7gyLA`
+    function syncVoucherThroughRich(richBaseURL, requestParam, getRichTokenResponse) {
         log.debug({
             title: 'syncVoucherThroughRich',
             details: 'start...'
@@ -1825,7 +1824,7 @@ define([
             details: url
         })
         let headers = {}
-        headers['Authorization'] = REQUEST_TOKEN
+        headers['Authorization'] = `Bearer ${getRichTokenResponse.body.id_token}`
         headers['Accept'] = `text/html, application/json, application/xhtml+xml, application/xml;q=0.9, image/webp, */*;q=0.8, application/pdf`
         headers['Accept-Language'] = `en-us`
         headers['Content-Type'] = 'application/json'
@@ -1890,7 +1889,17 @@ define([
                 })
                 const richBaseURL = richProcessSearchResult.values.custrecord_gw_conf_rich_base_url
                 const requestParam = composeRequestParam(voucherObject)
-                const syncVoucherResponse = syncVoucherThroughRich(richBaseURL, requestParam)
+
+                // get token
+                const getRichTokenResponse = getRichToken(richBaseURL, companyInformationArray[0])
+                log.debug({
+                    title: 'mainProcess - getRichTokenResponse', details: getRichTokenResponse
+                })
+                if (getRichTokenResponse.code !== 200) {
+                    throw getRichTokenResponse
+                }
+
+                const syncVoucherResponse = syncVoucherThroughRich(richBaseURL, requestParam, getRichTokenResponse)
                 log.debug({
                     title: 'proceedToSyncToB2B2 - syncVoucherResponse',
                     details: syncVoucherResponse
@@ -2094,7 +2103,16 @@ define([
                 const richBaseURL = richProcessSearchResult.values.custrecord_gw_conf_rich_base_url
                 const requestParam = composeAPVoucherRequestParam(APVoucherObject)
 
-                const syncVoucherResponse = syncVoucherThroughRich(richBaseURL, requestParam)
+                // get token
+                const getRichTokenResponse = getRichToken(richBaseURL, companyInformationArray[0])
+                log.debug({
+                    title: 'mainProcess - getRichTokenResponse', details: getRichTokenResponse
+                })
+                if (getRichTokenResponse.code !== 200) {
+                    throw getRichTokenResponse
+                }
+
+                const syncVoucherResponse = syncVoucherThroughRich(richBaseURL, requestParam, getRichTokenResponse)
                 log.debug({
                     title: 'proceedToSyncAPToB2B2 - syncVoucherResponse',
                     details: syncVoucherResponse
