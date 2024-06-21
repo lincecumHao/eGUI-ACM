@@ -1225,12 +1225,12 @@ define(['N/format', 'N/record', 'N/search'], function (format, record, search) {
       })
 
       var _filterArray = []
-      _filterArray.push([
-        'custrecord_gw_be_ns_subsidiary',
-        search.Operator.IS,
-        subsidiary
-      ])
-      _filterArray.push('AND')
+      // _filterArray.push([
+      //   'custrecord_gw_be_ns_subsidiary',
+      //   search.Operator.IS,
+      //   subsidiary
+      // ])
+      // _filterArray.push('AND')
       _filterArray.push([
         'custrecord_gw_business_entity_role_list',
         search.Operator.ANYOF,
