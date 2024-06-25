@@ -1302,7 +1302,7 @@ define([
         if(action === 'maintain') {
           if(!_selected_businessno) {
             alert('請選擇統編!')
-          } else if (_invoice_hiddent_listid !== '' && _selected_businessno !== ''){
+          } else {
             window.location = url.resolveScript({
               scriptId: scriptID,
               deploymentId: deployID,
