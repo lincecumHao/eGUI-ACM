@@ -541,6 +541,12 @@ define([
             value: stringutility.trimOrAppendBlank(_createdbyName),
           })
 
+          subListObj.setSublistValue({
+            id: 'customer_creditmemo_gui_num',
+            line: i,
+            value: stringutility.trimOrAppendBlank(_result.values.custbody_gw_gui_num_start),
+          })
+
           var _department = ''
           var _departmentname = ''
           if (_result.values.department.length != 0) {
@@ -1261,6 +1267,11 @@ define([
       id: 'customer_creditmemo_createdby',
       type: serverWidget.FieldType.TEXT,
       label: '處理人員',
+    })
+    _sublist.addField({
+      id: 'customer_creditmemo_gui_num',
+      type: serverWidget.FieldType.TEXT,
+      label: '發票號碼',
     })
     ////////////////////////////////////////////////////////////////////////////////////////////
     return _sublist

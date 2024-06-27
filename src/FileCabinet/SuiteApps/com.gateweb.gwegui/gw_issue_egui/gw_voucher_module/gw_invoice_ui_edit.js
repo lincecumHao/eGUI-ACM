@@ -2212,9 +2212,20 @@ define([
     var _gw_customs_export_no = ''
     //輸出或結匯日期
     var _gw_customs_export_date = ''
-    ////////////////////////////////////////////////////////////  
-   	creditMemoDetailsArrayObject.forEach(function (_result) {
-      log.debug({title: 'createCreditMemoDetails - result', details: _result})
+    //扣抵發票號碼
+    var _gw_custpage_deduction_egui_number = ''
+    ////////////////////////////////////////////////////////////
+
+    //var _nsSalesAccountValue = getNSInvoiceAccount('CREDITMEMO_ACCOUNT', 'CREDITMEMO_DETAIL_ACCOUNT');
+
+    creditMemoDetailsArrayObject.forEach(function (result) {
+      log.debug({title: 'createCreditMemoDetails - result', details: result})
+
+      var _recordType = result.recordType //creditmemo
+      var _id = result.id //948
+      var _mainline = result.mainline
+      log.debug('_mainline', '_mainline=' + _mainline)
+      log.debug('credit memo result', JSON.stringify(result))
 
       var _recordType = _result.recordType //creditmemo
       var _id = _result.id //948
@@ -2451,6 +2462,7 @@ define([
         _ns_SumTotalAmount += _ns_total_amount
         _ns_SumTaxAmount += _ns_tax_total_amount
       }
+
       //只放Sales進來
       if (
         _recordType === 'creditmemo' &&
@@ -2732,7 +2744,39 @@ define([
     var _sum_item_total_amount_field = form.getField({
       id: 'custpage_sum_item_total_amount'
     })
-    _sum_item_total_amount_field.defaultValue = _sum_item_total_amount.toFixed(_numericToFixed)
+    _sum_item_total_amount_field.defaultValue = _sum_item_total_amount.toFixed(
+      _numericToFixed
+    )
+
+    //扣抵發票號碼
+
+    var _custpage_allowance_deduction_period = form.getField({
+      id:'custpage_allowance_deduction_period'
+    })
+    var _custpage_deduction_egui_number = form.getField({
+      id:'custpage_deduction_egui_number'
+    })
+
+    if (!(form.getSublist({id:'invoicesublistid'}))){
+      //if (form.getSublist({id:'invoicesublistid'}) !== null){
+      var groupBy = function(xs, key) {
+        return xs.reduce(function(rv, x) {
+          (rv[x[key]] = rv[x[key]] || []).push(x);
+          return rv;
+        }, {});
+      };
+      var groupByGuiNum = Object.keys(groupBy(creditMemoDetailsArrayObject, 'custbody_gw_gui_num_start'))
+
+      if (groupByGuiNum.length === 1 && groupByGuiNum[0] !== '' ){
+        var _selectDeductionPeriod = form.getField({
+          id:'custpage_allowance_deduction_period'
+        })
+
+        _selectDeductionPeriod.defaultValue = 'user_selected'
+        _custpage_deduction_egui_number.defaultValue = groupByGuiNum[0]
+
+      }
+    }
     /////////////////////////////////////////////////////////////////////////////////////////
   }
 
@@ -3111,7 +3155,6 @@ define([
           createCreditMemoDetails(form, creditMemoDetailsArrayObject)
         }
     }
-      
     /////////////////////////////////////////////////////////////////////////////////////////
     //status, yearMonth, deptCode
     form.addButton({

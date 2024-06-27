@@ -122,17 +122,15 @@ define([
     } else if (_changeFieldId == 'custpage_mig_type') {
       changeMigType(_changeFieldId)
     } else if (_changeFieldId == 'custpage_allowance_deduction_period') {
-      var displayDeductionEGUINumberFlag = false
       var _allowance_deduction_period = _current_record.getValue({
         fieldId: _changeFieldId
       })
       var _deduction_egui_number = _current_record.getField({
         fieldId: 'custpage_deduction_egui_number'
       })
-      if (_allowance_deduction_period === 'user_selected') {
-        displayDeductionEGUINumberFlag = true
-      }
-      _deduction_egui_number.isDisplay = displayDeductionEGUINumberFlag
+
+      _deduction_egui_number.isDisplay = (_allowance_deduction_period === 'user_selected')
+
     }
   }
  
@@ -790,17 +788,21 @@ define([
     }) 
  
     if (_invoiceAry.length > 1 && _creditMemoAry.length > 1) {
-      _voucherOpenType = _voucherOpenType + 'ALL'
+      _voucherOpenType += 'ALL'
       showCreditMemoForm(
         false,
         _invoiceAry.length,
         _creditMemoAry.length,
         _total_amount
       )
+      _current_record.getField({fieldId: 'custpage_allowance_deduction_period'}).isDisplay = false
+
     } else if (_invoiceAry.length > 1 && _creditMemoAry.length <= 1) {
-      _voucherOpenType = _voucherOpenType + 'INVOICE'
+      _voucherOpenType += 'INVOICE'
+      _current_record.getField({fieldId: 'custpage_allowance_deduction_period'}).isDisplay = false
+
     } else if (_creditMemoAry.length > 1 && _invoiceAry.length <= 1) {
-      _voucherOpenType = _voucherOpenType + 'CREDITMEMO'
+      _voucherOpenType += 'CREDITMEMO'
        
       showCreditMemoForm(
         true,
@@ -809,7 +811,7 @@ define([
         _total_amount
       )
     } else {
-      _voucherOpenType = _voucherOpenType + 'NONE'
+      _voucherOpenType += 'NONE'
     }
     _current_record.setValue({
       fieldId: 'custpage_voucher_open_type',
