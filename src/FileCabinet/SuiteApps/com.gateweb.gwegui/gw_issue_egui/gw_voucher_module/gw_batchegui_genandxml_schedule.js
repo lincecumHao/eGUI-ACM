@@ -589,49 +589,6 @@ define([
       return itemName;
   }
   
-
-  //NE-373 
-  function getInvoiceItemName_NE_373(result) {
-	  var itemName = result.custcol_ntt_iv_itemname;
-	  //第一行: 發票品名+型號
-      //第二行: 客戶PO/客戶料號/等級
-      //等級: 依照客戶客戶主檔設定, 新增[發票是否顯示等級]欄位, 如果此欄位is true則發票品名第二行再帶入等級
-	  var itemModel= "";
-	  if (result['item.custitem_ntt_item_model'].length != 0) {
-		  itemModel = result['item.custitem_ntt_item_model'][0].text;  
-      }	   
-      if (itemModel.length !=0) {
-    	  itemName += ' '+ itemModel;
-      }
-      log.debug('itemName', itemName)      
-      itemName = itemName + "|" + result.otherrefnum ; //客戶PO(otherrefnum)     
-      
-      var customerpartnumber = "";
-      if (result.custcol_scm_customerpartnumber.length != 0) {
-    	  customerpartnumber = result.custcol_scm_customerpartnumber[0].text;  //客戶料號
-      }
-      log.debug('customerpartnumber', customerpartnumber);
-      if (customerpartnumber.length !=0) {
-    	  itemName += ' '+ customerpartnumber;
-      }       
-      var showLevel = result['customer.custentity_ntt_iv_check_show_level'];
-      log.debug('showLevel', showLevel);
-      
-      var itemLevel = "";
-      if (result.custcol_ntt_td_grade.length != 0) {
-    	  itemLevel = result.custcol_ntt_td_grade[0].text;  
-      }
-      log.debug('itemLevel', itemLevel); 
-      
-      if ((showLevel =='T' || showLevel == true) && itemLevel.length !=0) {
-    	  itemName += " "+itemLevel;
-      }
-      
-      log.debug('itemName', itemName);
-      
-      return itemName;
-  }
-  
   //NE-384
   function getCreditMemoItemName(result) {
 	  return result.custcol_ntt_iv_itemname; 
