@@ -210,7 +210,7 @@ define([
     })
     var lineSpace = xmlFileObject.linePrintSpace
       ? parseInt(xmlFileObject.linePrintSpace)
-      : 2
+      : 3
     var body = {
       url: '',
       payload: {
