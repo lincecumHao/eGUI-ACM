@@ -8,7 +8,8 @@ define([
   '../../../library/ramda.min',
   '../../../gw_dao/voucher/gw_dao_voucher',
   '../gw_egui_service',
-  '../../../gw_library/gw_api/gw_api'
+  '../../../gw_library/gw_api/gw_api',
+    'N/search'
 ], (
   runtime,
   file,
@@ -19,7 +20,8 @@ define([
   ramda,
   gwVoucherDao,
   eguiService,
-  GwApi
+  GwApi,
+  search
 ) => {
   /**
    * Module Description...
@@ -67,6 +69,23 @@ define([
     return !isNullOrEmpty(taxId) && taxId !== '0000000000'
   }
 
+  function validateMultipleRecipients(eguiObj) {
+    let isValid = true
+    log.audit({title: 'validateMultipleRecipients', details: 'start...'})
+    log.audit({title: 'validateMultipleRecipients - eguiObj', details: eguiObj})
+
+    const customerLookupResultObject = search.lookupFields({
+      type: search.Type.CUSTOMER,
+      id: eguiObj.buyerId,
+      columns: ['custentity_ntt_multiple_email']
+    })
+    log.debug({title: 'validateMultipleRecipients - customerLookupResultObject', details: customerLookupResultObject})
+    let multipleEmails = customerLookupResultObject['custentity_ntt_multiple_email']
+    isValid = multipleEmails.includes('@')
+
+    return isValid
+  }
+
   class EmailService {
     getEmailBody(eguiObj) {
       var htmlTemplateFile = file.load({
@@ -111,6 +130,7 @@ define([
     sendByVoucherId(subject, voucherId) {
         var eguiObj = gwVoucherDao.getGuiByVoucherId(voucherId)
         var eguiObjUpdated = updateEguiObj(eguiObj)
+      if(validateMultipleRecipients(eguiObjUpdated)) {
         var emailContentObj = {
           author: this.getAuthor(eguiObjUpdated),
           body: this.getEmailContent(eguiObjUpdated),
@@ -124,6 +144,9 @@ define([
           emailContentObj.attachments = this.getAttachmentFiles(eguiObjUpdated)
         }
         return this.send(subject, emailContentObj)
+      } else {
+        log.audit({title: 'sendByVoucherId', details: 'multiple recipients is not valid so do not send email notification'})
+      }
     }
     
     //NE-377 客戶主檔客製欄位紀錄多個 email，並確認分隔符號區分
@@ -135,10 +158,8 @@ define([
 		  id: internalid,
 		  isDynamic: true
 	  })
-		
-	  var email = customerRecord.getValue('email') 
-	  var ntt_multiple_email = customerRecord.getValue('custentity_ntt_multiple_email') 
-      var recipients = ntt_multiple_email || email || 'jackielin@gateweb.com.tw'
+
+	  var recipients = customerRecord.getValue('custentity_ntt_multiple_email')
       //NE-377 20240301 客戶確認未來使用分號 ; 作為分隔符號
       log.debug({ title: 'recipients', details: recipients })   
 	  var multi_mail_address_ary = recipients.split(';') 
