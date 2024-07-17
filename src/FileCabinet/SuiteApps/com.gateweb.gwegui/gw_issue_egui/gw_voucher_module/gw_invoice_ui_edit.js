@@ -1393,7 +1393,7 @@ define([
           _gw_gui_main_memo += '|'+'總備註:'
 	      //_gw_gui_main_memo +='|'+'幣別 :'+_currency_text
 	      _gw_gui_main_memo +='|'+'匯率 :'+_exchangerate
-	      _gw_gui_main_memo +='|'+_currency_text+'總金額(含稅) :' + _fxamount 
+	      _gw_gui_main_memo +='|'+_currency_text+'總金額(含稅) :' + _fxamount.toFixed(4)
       }
       
       var _index_currency_text = _currency_text+_exchangerate
