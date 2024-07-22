@@ -168,6 +168,10 @@ define([], function () {
       name: 'applyPeriodSelect',
       id: 'custrecord_gw_ap_doc_apply_period'
     },
+    applyMonthSelect: {
+      name: 'applyMonthSelect',
+      id: 'custrecord_gw_ap_doc_apply_month'
+    },
     filingSalesTax: {
       name: 'filingSalesTax',
       id: 'custrecord_gw_ap_doc_apply'

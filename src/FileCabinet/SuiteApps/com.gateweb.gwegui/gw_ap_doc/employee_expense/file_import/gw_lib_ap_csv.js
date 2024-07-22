@@ -11,7 +11,8 @@ define([
   '../../application/gw_service_ap_doc_apply_period',
   '../../application/gw_service_ap_doc_gui_number',
   '../../application/moment-with-locales',
-  '../../application/gw_lib_wrapper'
+  '../../application/gw_lib_wrapper',
+  '../../application/gw_service_ap_doc_apply_month'
 ], function (
   format,
   record,
@@ -25,7 +26,8 @@ define([
   applyPeriodService,
   guiNumService,
   moment,
-  wrapperLib
+  wrapperLib,
+  applyMonthService
 ) {
   /**
    * Module Description...
@@ -65,6 +67,7 @@ define([
   const transactionTypeMapping = {}
   var lines = {}
   var applyPeriod = applyPeriodService.convertToApplyPeriod(null)
+  var applyMonth = null
   var companyPreference = null
   var dateFormatPreference = ''
 
@@ -72,6 +75,9 @@ define([
 
   function setApplyPeriod(inputValue) {
     if (inputValue) applyPeriod = inputValue
+  }
+  function setApplyMonth(inputValue) {
+    if (inputValue) applyMonth = applyMonthService.getRecordByValue(inputValue)
   }
 
   function setHeaderCols(headerLine) {
@@ -217,6 +223,7 @@ define([
     recordObj[
       apDocFields.fields.applyPeriodSelect.id
     ] = applyPeriodService.getRecordByValue(applyPeriod).id
+    recordObj[apDocFields.fields.applyMonthSelect.id] = applyMonth
     return recordObj
   }
 
@@ -355,6 +362,7 @@ define([
 
   exports.setHeaderCols = setHeaderCols
   exports.setApplyPeriod = setApplyPeriod
+  exports.setApplyMonth = setApplyMonth
   exports.removeThousandSeparator = removeThousandSeparator
   exports.reFormatApCsvLine = reFormatApCsvLine
   exports.parseLine = parseLine

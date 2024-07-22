@@ -7,7 +7,8 @@ define([
   '../../application/gw_service_ap_doc_apply_period',
   './gw_lib_csv_task_service',
   './gw_lib_ap_csv',
-  '../../application/gw_lib_wrapper'
+  '../../application/gw_lib_wrapper',
+  '../../application/gw_service_ap_doc_apply_month',
 ], (
   https,
   serverWidget,
@@ -17,7 +18,8 @@ define([
   applyPeriodService,
   csvTaskService,
   csvService,
-  wrapperLib
+  wrapperLib,
+  applyMonthService
 ) => {
   /**
    * Module Description...
@@ -83,9 +85,13 @@ define([
       label: '申報期別',
       type: serverWidget.FieldType.TEXT
     })
-
     applyPeriodField.updateBreakType({
       breakType: serverWidget.FieldBreakType.STARTROW
+    })
+    var applyMonthField = uploadForm.addField({
+      id: 'apply_month',
+      label: '申報月',
+      type: serverWidget.FieldType.TEXT
     })
     var uploadField = uploadForm.addField({
       id: 'upload_file',
@@ -114,10 +120,17 @@ define([
       : applyPeriodService.convertToApplyPeriod(null)
     transactionField.defaultValue = paramTranId ? paramTranId : '107'
     transactionTypeField.defaultValue = paramTranType
+    applyMonthField.defaultValue = applyMonthService.convertToApplyMonth()
     applyPeriodField.updateLayoutType({
       layoutType: serverWidget.FieldLayoutType.OUTSIDE
     })
     applyPeriodField.updateBreakType({
+      breakType: serverWidget.FieldBreakType.STARTROW
+    })
+    applyMonthField.updateLayoutType({
+      layoutType: serverWidget.FieldLayoutType.OUTSIDE
+    })
+    applyMonthField.updateBreakType({
       breakType: serverWidget.FieldBreakType.STARTROW
     })
     uploadField.updateLayoutType({
@@ -167,6 +180,7 @@ define([
     }
     var uploaded_file = context.request.files['upload_file']
     var applyPeriod = context.request.parameters['apply_period'] || ''
+    var applyMonth = context.request.parameters['apply_month'] || ''
     var transactionId = context.request.parameters['transaction_id'] || ''
     var transactionType = context.request.parameters['transaction_type'] || ''
     var tranType = transactionTypeMapping[transactionType]
@@ -174,7 +188,7 @@ define([
     // if (fileLines > 2000) {
     // submitToQueue(uploaded_file, applyPeriod, transactionId)
     // } else {
-    processUploadFile(uploaded_file, applyPeriod, transactionId, tranType)
+    processUploadFile(uploaded_file, applyPeriod, applyMonth, transactionId, tranType)
     // }
 
     redirectToExpenseRecord(context, transactionId, tranType)
@@ -200,11 +214,13 @@ define([
   function processUploadFileCore(
     uploaded_file,
     applyPeriod,
+    applyMonth,
     transactionId,
     transactionType
   ) {
     var fileLines = getFileContent(uploaded_file)
     csvService.setApplyPeriod(applyPeriod)
+    csvService.setApplyMonth(applyMonth)
     var allNsRecord = csvService.parseAllLines(fileLines)
     var validRecords = filterValidateRecord(allNsRecord)
     log.debug({
