@@ -2245,12 +2245,12 @@ define([
 
     //var _nsSalesAccountValue = getNSInvoiceAccount('CREDITMEMO_ACCOUNT', 'CREDITMEMO_DETAIL_ACCOUNT');
 
-    creditMemoDetailsArrayObject.forEach(function (result) {
-      log.debug({title: 'createCreditMemoDetails - result', details: result})
+    creditMemoDetailsArrayObject.forEach(function (_result) {
+      log.debug({title: 'createCreditMemoDetails - _result', details: _result})
 
-      var _recordType = result.recordType //creditmemo
-      var _id = result.id //948
-      var _mainline = result.mainline
+      var _recordType = _result.recordType //creditmemo
+      var _id = _result.id //948
+      var _mainline = _result.mainline
       log.debug('_mainline', '_mainline=' + _mainline)
       log.debug('credit memo result', JSON.stringify(result))
 
