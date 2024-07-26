@@ -10,18 +10,32 @@ define(['N/record',
 	    '../../gw_dao/evidenceIssueStatus/gw_dao_evidence_issue_status_21'], 
 	    function (record, format, search, doc_format_21, issue_status_21) {  
   /////////////////////////////////////////////////////////////////////////////////////////////
-  function syncEguiInfoToNetsuiteDoc(voucher_main_record, document_ary) {  
-	log.debug('syncEguiInfoToNetsuiteDoc', 'voucher_main_record='+JSON.stringify(voucher_main_record))
-	log.debug('syncEguiInfoToNetsuiteDoc', 'document_ary='+document_ary.toString())
-    try { 
+  function syncEguiInfoToNetsuiteDoc(voucher_main_record, document_ary) {
+	log.audit({
+		title: 'syncEguiInfoToNetsuiteDoc - voucher_main_record',
+		details: voucher_main_record
+	})
+	  log.audit({
+		  title: 'syncEguiInfoToNetsuiteDoc - document_ary',
+		  details: document_ary
+	  })
+    try {
     	for (var i = 0; i < document_ary.length; i++) {
              var _document_list = document_ary[i] //INVOICE_1259998
              var _document_ary = _document_list.split('_')
              var _document_type = _document_ary[0].toUpperCase()
              var _document_internal_id = _document_ary[_document_ary.length-1]
-             
-             _document_type = document_ary.toString().replace('_'+_document_internal_id, '');
-             
+
+			 log.debug({
+				 title: 'syncEguiInfoToNetsuiteDoc - before syncToNetsuiteDocument',
+				 details: {
+					 _document_list: _document_list,
+					 _document_ary: _document_ary,
+					 _document_type: _document_type,
+					 _document_internal_id: _document_internal_id
+				 }
+			 })
+
              syncToNetsuiteDocument(voucher_main_record, _document_type, _document_internal_id)
     	}
  
@@ -31,7 +45,14 @@ define(['N/record',
   }
   
   function syncToNetsuiteDocument(voucher_main_record, document_type, document_internal_id) { 
-	log.debug('syncToNetsuiteDocument', 'document_type='+document_type+',document_internal_id='+document_internal_id)
+	log.audit({
+		title: 'syncToNetsuiteDocument - params',
+		details: {
+			voucher_main_record: voucher_main_record,
+			document_type: document_type,
+			document_internal_id: document_internal_id
+		}
+	})
     try { 
     	var _record_type_id = ''
     	if (document_type == 'INVOICE') {
