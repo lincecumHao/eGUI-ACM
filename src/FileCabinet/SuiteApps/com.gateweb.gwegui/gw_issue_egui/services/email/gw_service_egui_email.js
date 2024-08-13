@@ -206,7 +206,7 @@ define([
     }
 
     getEguiPdf(eguiObj) {
-      var xmlString = eguiService.genXml(eguiObj)
+      var xmlString = eguiService.genXml(eguiObj).replaceAll('&', '&amp;')
       var pdfParams = {
         filename: eguiObj.uploadXmlFileName,
         xml: xmlString,
