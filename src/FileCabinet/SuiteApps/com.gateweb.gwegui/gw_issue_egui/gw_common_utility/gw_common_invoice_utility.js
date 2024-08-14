@@ -1209,63 +1209,40 @@ define(['N/format', 'N/record', 'N/search'], function (format, record, search) {
   }
 
   //透過user_id取得資料營業人清單
-  function getBusinessEntitByUserId(user_id, subsidiary) {
-    var _comapny_ary = []
+  function getBusinessEntityByUserId(currentUserObject) {
+    var companyArray = []
 
-    if (subsidiary != null && subsidiary != '') {
-      var _role_id_ary = getUserRolesByUserId(user_id)
+    var userRole = currentUserObject.role
+    var recordType = 'customrecord_gw_business_entity'
+    var searchColumns = []
+    searchColumns.push('custrecord_gw_be_tax_id_number')
+    searchColumns.push('custrecord_gw_be_gui_title')
+    searchColumns.push('custrecord_gw_be_ns_subsidiary')
+    var searchFilters = []
+    searchFilters.push(['custrecord_gw_business_entity_role_list', 'anyof', userRole])
+    var getBusinessEntitySearchObject = search.create({
+      type: recordType,
+      columns: searchColumns,
+      filters: searchFilters
+    })
 
-      var _mySearch = search.create({
-        type: 'customrecord_gw_business_entity',
-        columns: [
-          search.createColumn({ name: 'custrecord_gw_be_tax_id_number' }),
-          search.createColumn({ name: 'custrecord_gw_be_gui_title' }),
-          search.createColumn({ name: 'custrecord_gw_be_ns_subsidiary' })
-        ]
+    getBusinessEntitySearchObject.run().each(function (result) {
+      log.debug({title: 'GET Business Entity result', details: JSON.stringify(result)})
+
+      var _tax_id_number = result.getValue({name: 'custrecord_gw_be_tax_id_number'})
+      var _be_gui_title = result.getValue({name: 'custrecord_gw_be_gui_title'})
+      var _be_ns_subsidiary = result.getValue({name: 'custrecord_gw_be_ns_subsidiary'})
+
+      companyArray.push({
+        tax_id_number: _tax_id_number,
+        be_gui_title: _be_gui_title,
+        subsidiary: _be_ns_subsidiary
       })
 
-      var _filterArray = []
-      // _filterArray.push([
-      //   'custrecord_gw_be_ns_subsidiary',
-      //   search.Operator.IS,
-      //   subsidiary
-      // ])
-      // _filterArray.push('AND')
-      _filterArray.push([
-        'custrecord_gw_business_entity_role_list',
-        search.Operator.ANYOF,
-        _role_id_ary
-      ])
-      _mySearch.filterExpression = _filterArray
-      log.debug(
-        'GET BusinessEntit _filterArray: ',
-        JSON.stringify(_filterArray)
-      )
-      _mySearch.run().each(function (result) {
-        var _internalid = result.id
-        log.debug('GET BusinessEntit result: ', JSON.stringify(result))
+      return true
+    })
 
-        var _tax_id_number = result.getValue({
-          name: 'custrecord_gw_be_tax_id_number'
-        })
-        var _be_gui_title = result.getValue({
-          name: 'custrecord_gw_be_gui_title'
-        })
-        var _be_ns_subsidiary = result.getValue({
-          name: 'custrecord_gw_be_ns_subsidiary'
-        })
-        var _obj = {
-          tax_id_number: _tax_id_number,
-          be_gui_title: _be_gui_title,
-          subsidiary: _be_ns_subsidiary
-        }
-
-        _comapny_ary.push(_obj)
-
-        return true
-      })
-    }
-    return _comapny_ary
+    return companyArray
   }
 
   //取得人員權限清單-255781
@@ -1958,53 +1935,11 @@ define(['N/format', 'N/record', 'N/search'], function (format, record, search) {
   function getManualOpenID() {
     return 'MI' 
   }
-  
-  function getVoucherMigType(gw_voucher_type){
-	var _mig_type_option = 1	
-	try {
-      var _mySearch = search.create({
-        type: 'customrecord_gw_mig_type',
-        columns: [
-          search.createColumn({ name: 'custrecord_gw_mt_egui_type' }),
-          search.createColumn({ name: 'custrecord_gw_mt_action_mode' }),
-          search.createColumn({ name: 'custrecord_gw_mt_bus_tran_type' }),
-          search.createColumn({ name: 'custrecord_gw_mt_mig_type' })
-        ]
-      })
-
-      var _filterArray = []      
-      
-      if (gw_voucher_type=="ALLOWANCE") gw_voucher_type='Allowance'
-    	  
-	  _filterArray.push(['custrecord_gw_mt_bus_tran_type', 'is', 'B2C'])
-      _filterArray.push('and') 
-      _filterArray.push(['custrecord_gw_mt_egui_type', 'is', gw_voucher_type])
-      _filterArray.push('and') 
-      if (gw_voucher_type=='EGUI'){
-    	  _filterArray.push(['custrecord_gw_mt_mig_type', 'is', 'C0401'])
-      }else{
-    	  _filterArray.push(['custrecord_gw_mt_mig_type', 'is', 'D0401'])
-      } 
-      //_filterArray.push('and') 
-      //_filterArray.push(['custrecord_gw_mt_action_mode', 'is', 'ISSUE'])
-      _mySearch.filterExpression = _filterArray
-
-      _mySearch.run().each(function (result) {
-    	  _mig_type_option = result.id 
-          return true
-      })
-    } catch (e) {
-      log.error(e.name, e.message)
-    }    
-    return _mig_type_option
-  }
-	  
 
   /////////////////////////////////////////////////////////////////////////////////////////////
 
   return {
-	getVoucherMigType: getVoucherMigType,
-    getBusinessEntitByUserId: getBusinessEntitByUserId,
+    getBusinessEntitByUserId: getBusinessEntityByUserId,
     loadAllTaxInformation: loadAllTaxInformation,
     getApplyPeriodOptionId: getApplyPeriodOptionId,
     getCustomerBAN: getCustomerBAN,
