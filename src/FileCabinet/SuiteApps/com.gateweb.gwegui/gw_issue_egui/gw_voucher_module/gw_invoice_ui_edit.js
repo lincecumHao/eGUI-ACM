@@ -2252,7 +2252,7 @@ define([
       var _id = _result.id //948
       var _mainline = _result.mainline
       log.debug('_mainline', '_mainline=' + _mainline)
-      log.debug('credit memo result', JSON.stringify(result))
+      log.debug('credit memo result', JSON.stringify(_result))
 
       var _recordType = _result.recordType //creditmemo
       var _id = _result.id //948
