@@ -87,9 +87,48 @@ define([
             if(companyArray.length > 0)  flag = true
         }
 
+        if(context.newRecord.type === 'invoice' && getTriangularTrade(recordObject)) {
+            flag = false
+        }
+
         log.debug({title: 'isNeedToDisplayCreateVoucherButton - flag', details: flag})
 
         return flag
+    }
+
+    function getTriangularTrade(recordObject) {
+        let triangularTrade = false
+        const numLines = recordObject.getLineCount({sublistId: 'item'})
+        log.debug({
+            title: 'getTriangularTrade - numLines',
+            details: numLines
+        })
+        const sublistId = 'item'
+        for (let line = 0; line < numLines; line ++) {
+            const salesTypeId = recordObject.getSublistValue({
+                sublistId,
+                line,
+                fieldId: 'cseg_ntt_sales_type'
+            })
+            var salesTypeText = recordObject.getSublistText({
+                sublistId,
+                line,
+                fieldId: 'cseg_ntt_sales_type',
+
+            });
+            if (salesTypeText === '三角貿易') {
+                triangularTrade = true
+            }
+            log.debug({
+                title: 'getTriangularTrade - params',
+                details: {
+                    salesTypeId,
+                    salesTypeText,
+                    triangularTrade
+                }
+            })
+        }
+        return triangularTrade
     }
 
     return exports
