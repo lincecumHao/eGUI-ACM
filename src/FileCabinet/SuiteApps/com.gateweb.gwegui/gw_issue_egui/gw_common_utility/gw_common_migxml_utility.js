@@ -2586,14 +2586,20 @@ define([
           }
         }
         //20201102 walter modify _unit_price = _item_amount /_item_quantity
-        if (convertToFloat(_item_quantity) != 0) {
-          _unit_price = (
-            convertToFloat(_item_amount) / convertToFloat(_item_quantity)
-          )
-            .toFixed(_numericToFixed)
-            .toString()
+
+        var unitPriceRule = ['', null, 0, '0']
+        if(unitPriceRule.indexOf(_unit_price) !== -1) {
+          if (convertToFloat(_item_quantity) != 0) {
+            _unit_price = (
+                convertToFloat(_item_amount) / convertToFloat(_item_quantity)
+            )
+                .toFixed(_numericToFixed)
+                .toString()
+          } else {
+            _unit_price = '0'
+          }
         } else {
-          _unit_price = '0'
+          _unit_price = parseFloat(_unit_price).toFixed(_numericToFixed)
         }
 
         if (voucher_type === 'EGUI') {
