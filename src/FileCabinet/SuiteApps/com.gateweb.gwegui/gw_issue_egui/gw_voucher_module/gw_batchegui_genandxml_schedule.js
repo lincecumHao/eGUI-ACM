@@ -1621,11 +1621,14 @@ define([
     tax_diff_balance,
     apply_user_id
   ) {
+    log.audit({title: 'saveBatchVouchers - mig_type', details: mig_type})
+    log.audit({title: 'saveBatchVouchers - jsonObjAry', details: JSON.stringify(jsonObjAry)})
     var _completed_Id_ary = []
     try {
       if (jsonObjAry != null) {
         for (var i = 0; i < jsonObjAry.length; i++) {
           var _obj = jsonObjAry[i]
+          log.audit({title: 'saveBatchVouchers - _obj', details: JSON.stringify(_obj)})
           //SuiteScript 2.0 Scheduled Script Type => 10,000
           //search.load(options) => 5
           //record.create
@@ -1640,6 +1643,8 @@ define([
           //B2C=>混合稅率
           //B2B=>分稅別=>單張開立
           if (mig_type == 'B2C') {
+            log.debug({title: 'in mig_type is B2C', details: '...'})
+            log.debug({title: 'in mig_type is B2C - _obj', details: _obj})
             //混合稅率
             //判斷是否為混合稅
             var _b2cMixTaxType = '9'
@@ -1656,6 +1661,8 @@ define([
             var _itemObjAry = []
             for (var a = 0; a < _obj.tax1ItemAry.length; a++) {
                  var _itemObj = _obj.tax1ItemAry[a]
+                 _itemObj.calculatedTaxAmt = roundDecimal((parseFloat(_itemObj.amount) * 0.05), 2)
+                 _itemObj.calculatedTotalAmtWithTax = roundDecimal((parseFloat(_itemObj.amount) + (parseFloat(_itemObj.amount) * 0.05)), 2)
                  _itemObjAry.push(_itemObj)
             }
             for (var a = 0; a < _obj.tax2ItemAry.length; a++) {
@@ -1666,7 +1673,7 @@ define([
                  var _itemObj = _obj.tax3ItemAry[a]
                  _itemObjAry.push(_itemObj)
             }
-
+            log.debug({title: 'in mig_type is B2C - _itemObjAry', details: _itemObjAry})
             resetMainObjectTaxInformation(
               voucher_type,
               invoice_type,
@@ -1682,6 +1689,8 @@ define([
               apply_user_id
             )
           } else {
+            log.debug({title: 'in mig_type is not B2C', details: '...'})
+            log.debug({title: 'in mig_type is not B2C - _obj', details: JSON.stringify(_obj)})
             resetMainObjectTaxInformation(
               voucher_type,
               invoice_type,
@@ -1765,6 +1774,8 @@ define([
     apply_user_id
   ) {
     try {
+      log.audit({title: 'in resetMainObjectTaxInformation', details: 'start...'})
+      log.audit({title: 'in resetMainObjectTaxInformation - detail_item_ary', details: JSON.stringify(detail_item_ary)})
       if (detail_item_ary.length != 0) {
         var _newItemAry = []
         //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1888,6 +1899,10 @@ define([
         //2.存檔Main及Details
         var _oneVoucherObj
         if (voucher_type == 'EGUI') {
+          log.debug({
+            title: 'in resetMainObjectTaxInformation, voucher_type is EGUI - _targetInvoiceObj',
+            details: JSON.stringify(_targetInvoiceObj)
+          })
           _oneVoucherObj = saveMainAndDeatilVoucher(
             voucher_type,
             invoice_type,
@@ -2001,6 +2016,49 @@ define([
     return _tax_diff_error
   }
 
+  let roundDecimal = function (val, precision) {
+    return Math.round(Math.round(val * Math.pow(10, (precision || 0) + 1)) / 10) / Math.pow(10, (precision || 0));
+  }
+
+  function calculateTaxAmount(voucherObject) {
+    log.audit({title: 'in calculateTaxAmount', details: 'start...'})
+    log.audit({title: 'in calculateTaxAmount - voucherObject', details: JSON.stringify(voucherObject)})
+
+    let taxAmount = voucherObject.amountObj.taxAmount
+    log.debug({title: 'in calculateTaxAmount - 1.taxAmount', details: taxAmount})
+    let flag = false
+    let newTaxAmount = 0
+    if(voucherObject.amountObj.totalAmount !== (voucherObject.amountObj.salesAmount + voucherObject.amountObj.taxAmount)
+        && voucherObject.tax1ItemAry.length > 0) {
+      flag = true
+      log.debug({title: 'in calculateTaxAmount - totalAmount', details: voucherObject.amountObj.totalAmount})
+      log.debug({
+        title: 'in calculateTaxAmount - salesAmount+taxAmount',
+        details: voucherObject.amountObj.salesAmount + voucherObject.amountObj.taxAmount
+      })
+      // TODO - recalculate the tax amount
+      for (let index = 0; index < voucherObject.tax1ItemAry.length; index ++) {
+        newTaxAmount += voucherObject.tax1ItemAry[index].calculatedTaxAmt
+      }
+    }
+
+    log.debug({title: 'in calculateTaxAmount - 1. newTaxAmount', details: newTaxAmount})
+    newTaxAmount = Math.round(newTaxAmount)
+    log.debug({title: 'in calculateTaxAmount - 2. newTaxAmount - after Math.round()', details: newTaxAmount})
+
+    log.debug({
+      title: 'in calculateTaxAmount - update amt',
+      details: {
+        totalAmount: voucherObject.amountObj.totalAmount,
+        salesAmount: voucherObject.amountObj.salesAmount,
+        oldTaxAmount: voucherObject.amountObj.taxAmount,
+        newTaxAmount: newTaxAmount
+      }
+    })
+
+    return flag ? newTaxAmount : taxAmount
+  }
+
   //分稅別=>單張開立
   function saveMainAndDeatilVoucher(
     voucher_type,
@@ -2019,6 +2077,8 @@ define([
     var _invoiceObj
     var _mainRecordId
     try {
+      log.audit({title: 'in saveMainAndDeatilVoucher', details: 'start...'})
+      log.audit({title: 'in saveMainAndDeatilVoucher - jsonObj', details: JSON.stringify(jsonObj)})
       //var _documentDate = getCompanyLocatDate();
       //var _documentTime = getCompanyLocatTime()
       log.debug({title: 'dateutility.getCompanyLocatTime()', details: dateutility.getCompanyLocatTime()})
@@ -2178,7 +2238,9 @@ define([
         }
         log.debug('檢查-getAllowanceNumber', 'documentNumber=' + _documentNumber)
       } 
-      
+
+      //TODO - create voucher main
+
       var _status = 'VOUCHER_SUCCESS'
       var _voucherMainRecord = record.create({
         type: _voucher_main_record,
@@ -2394,10 +2456,15 @@ define([
         fieldId: 'custrecord_gw_zero_sales_amount',
         value: _net_value * _amountObj.zeroSalesAmount,
       })
+      // _voucherMainRecord.setValue({
+      //   fieldId: 'custrecord_gw_tax_amount',
+      //   value: _net_value * _amountObj.taxAmount,
+      // })
       _voucherMainRecord.setValue({
         fieldId: 'custrecord_gw_tax_amount',
-        value: _net_value * _amountObj.taxAmount,
+        value: calculateTaxAmount(jsonObj),
       })
+
       _voucherMainRecord.setValue({
         fieldId: 'custrecord_gw_tax_type',
         value: _amountObj.taxType,
@@ -2594,14 +2661,14 @@ define([
             _voucherDetailRecord.setValue({
               fieldId: 'custrecord_gw_item_tax_amount',
               value:
-                _net_value *
-                stringutility.convertToFloat(_detailObj.itemTaxAmount),
+                  _detailObj.calculatedTaxAmt > 0 ? _net_value * _detailObj.calculatedTaxAmt
+                      : _net_value * stringutility.convertToFloat(_detailObj.itemTaxAmount)
             })
             _voucherDetailRecord.setValue({
               fieldId: 'custrecord_gw_item_total_amount',
               value:
-                _net_value *
-                stringutility.convertToFloat(_detailObj.itemTotalAmount),
+                  _detailObj.calculatedTaxAmt > 0 ? _net_value * _detailObj.calculatedTotalAmtWithTax
+                    : _net_value * stringutility.convertToFloat(_detailObj.itemTotalAmount)
             })
 
             _voucherDetailRecord.setValue({
