@@ -2422,7 +2422,7 @@ define([
         }
       }
       /////////////////////////////////////////////////////////////////////////////////
-      var _rate = _result.fxrate //3047.61904762
+      var _rate = _result.rate //3047.61904762
 
       var _department = ''
       if (_result.department.length != 0) {
