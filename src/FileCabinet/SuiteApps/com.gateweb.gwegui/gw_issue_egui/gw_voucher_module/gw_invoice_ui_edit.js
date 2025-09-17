@@ -1525,7 +1525,7 @@ define([
         sublist.setSublistValue({
           id: 'custpage_unit_price',
           line: row,
-          value: stringutility.trimOrAppendBlank(_rate)
+          value: stringutility.trimOrAppendBlank(_rate) || " "
         })
         sublist.setSublistValue({
           id: 'custpage_item_quantity',
@@ -2577,7 +2577,7 @@ define([
         sublist.setSublistValue({
           id: 'custpage_unit_price',
           line: row,
-          value: stringutility.trimOrAppendBlank(_rate)
+          value: stringutility.trimOrAppendBlank(_rate) || " "
         })
         sublist.setSublistValue({
           id: 'custpage_item_quantity',
