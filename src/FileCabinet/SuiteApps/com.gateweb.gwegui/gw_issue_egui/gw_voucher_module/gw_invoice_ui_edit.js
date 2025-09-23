@@ -50,13 +50,13 @@ define([
   var _customer_deposit_text = '顧客押金'
   //部門代碼
   var _default_department_id = ''
-	   
+
   //統計Item金額
   var _sum_item_total_amount = 0
 
   //商品名稱欄位
   var _ns_item_name_field = invoiceutility.getConfigureValue('ITEM_GROUP', 'ITEM_NAME_FIELD')
-  
+
   //日期格式
   var _userDateFormat = 'YYYY/MM/DD';
 
@@ -225,7 +225,7 @@ define([
     _applicable_zero_tax_field.updateDisplayType({
       displayType: serverWidget.FieldDisplayType.HIDDEN
     })
-    
+
     var _gw_gui_num_start_field = form.addField({
       id: 'custbody_gw_gui_num_start',
       type: serverWidget.FieldType.TEXT,
@@ -234,7 +234,7 @@ define([
     _gw_gui_num_start_field.updateDisplayType({
       displayType: serverWidget.FieldDisplayType.HIDDEN
     })
-    
+
     //海關出口單類別
     var _customs_export_category_field = form.addField({
       id: 'custpage_gw_customs_export_category',
@@ -598,7 +598,7 @@ define([
     _total_amount.updateDisplayType({
       displayType: serverWidget.FieldDisplayType.DISABLED
     })
-    
+
     //小計含稅總金額
     var _sum_item_total_amount_field = form.addField({
       id: 'custpage_sum_item_total_amount',
@@ -819,7 +819,7 @@ define([
     }
     return _tax_amount.toFixed(_numericToFixed)
   }
-  
+
 
   function createInvoiceSublistFields(sublist) {
     sublist.addField({
@@ -951,7 +951,7 @@ define([
       displayType: serverWidget.FieldDisplayType.HIDDEN
     })
   }
-  
+
   //NE-472
   function getInvoiceItemName(result) {
 	  var itemName = result.custcol_ntt_iv_itemname;
@@ -960,19 +960,19 @@ define([
       //等級: 依照客戶客戶主檔設定, 新增[發票是否顯示等級]欄位, 如果此欄位is true則發票品名第二行再帶入等級
 	  var showLevel = result['customer.custentity_ntt_iv_check_show_level'];
       log.debug('showLevel', showLevel);
-      
+
       var itemLevel = "";
       if (result.custcol_ntt_td_grade.length != 0) {
-    	  itemLevel = result.custcol_ntt_td_grade[0].text;  
+    	  itemLevel = result.custcol_ntt_td_grade[0].text;
       }
-      log.debug('itemLevel', itemLevel); 
+      log.debug('itemLevel', itemLevel);
       if ((showLevel =='T' || showLevel == true) && itemLevel.length !=0) {
     	  itemName += " "+itemLevel; //第一行: 發票品名+型號 ==> 發票品名+等級
       }
-            
-      //第二行: 客戶PO/客戶料號 (自訂)==custcol_ntt_cpn_item   
-      itemName = itemName + "|" + result.otherrefnum ; //客戶PO(otherrefnum)     
-      
+
+      //第二行: 客戶PO/客戶料號 (自訂)==custcol_ntt_cpn_item
+      itemName = itemName + "|" + result.otherrefnum ; //客戶PO(otherrefnum)
+
       var customerpartnumber = "";
       if (result.custcol_ntt_cpn_item.length != 0) {
     	  customerpartnumber = result.custcol_ntt_cpn_item[0].text;  //客戶料號(自訂)
@@ -980,13 +980,13 @@ define([
       log.debug('customerpartnumber', customerpartnumber);
       if (customerpartnumber.length !=0) {
     	  itemName += ' '+ customerpartnumber;
-      }       
-            
+      }
+
       log.debug('itemName', itemName);
-      
+
       return itemName;
   }
-  
+
   //NE-373
   function getInvoiceItemName_NE_373(result) {
 	  var itemName = result.custcol_ntt_iv_itemname;
@@ -995,14 +995,14 @@ define([
       //等級: 依照客戶客戶主檔設定, 新增[發票是否顯示等級]欄位, 如果此欄位is true則發票品名第二行再帶入等級
 	  var itemModel= "";
 	  if (result['item.custitem_ntt_item_model'].length != 0) {
-		  itemModel = result['item.custitem_ntt_item_model'][0].text;  
-      }	   
+		  itemModel = result['item.custitem_ntt_item_model'][0].text;
+      }
       if (itemModel.length !=0) {
     	  itemName += ' '+ itemModel;
       }
-      log.debug('itemName', itemName)      
-      itemName = itemName + "|" + result.otherrefnum ; //客戶PO(otherrefnum)     
-      
+      log.debug('itemName', itemName)
+      itemName = itemName + "|" + result.otherrefnum ; //客戶PO(otherrefnum)
+
       var customerpartnumber = "";
       if (result.custcol_scm_customerpartnumber.length != 0) {
     	  customerpartnumber = result.custcol_scm_customerpartnumber[0].text;  //客戶料號
@@ -1010,36 +1010,36 @@ define([
       log.debug('customerpartnumber', customerpartnumber);
       if (customerpartnumber.length !=0) {
     	  itemName += ' '+ customerpartnumber;
-      }       
+      }
       var showLevel = result['customer.custentity_ntt_iv_check_show_level'];
       log.debug('showLevel', showLevel);
-      
+
       var itemLevel = "";
       if (result.custcol_ntt_td_grade.length != 0) {
-    	  itemLevel = result.custcol_ntt_td_grade[0].text;  
+    	  itemLevel = result.custcol_ntt_td_grade[0].text;
       }
-      log.debug('itemLevel', itemLevel); 
-      
+      log.debug('itemLevel', itemLevel);
+
       if ((showLevel =='T' || showLevel == true) && itemLevel.length !=0) {
     	  itemName += " "+itemLevel;
       }
-      
+
       log.debug('itemName', itemName);
-      
+
       return itemName;
   }
   //NE-384
   function getCreditMemoItemName(result) {
-	  return result.custcol_ntt_iv_itemname; 
+	  return result.custcol_ntt_iv_itemname;
   }
-  
+
   function round(num) {
 	  var m = Number((Math.abs(num) * 100).toPrecision(15));
 	  return Math.round(m) / 100 * Math.sign(num);
   }
 
   var _gw_check_currency_and_exchangerate = ''
-	  
+
   function createInvoiceDetails(form, invoiceDetailsArrayObject) {
     //處理Detail
     var sublist = form.addSublist({
@@ -1047,13 +1047,13 @@ define([
       type: serverWidget.SublistType.LIST,
       label: 'NS Invoice 商品清單'
     })
-    //sublist.addMarkAllButtons();    
+    //sublist.addMarkAllButtons();
     createInvoiceSublistFields(sublist)
- 
+
     /////////////////////////////////////////////////////////////////////////////////////////
     //1.處理 Invoice Detail Items
     var _selectDepartment = ''
-    var _selectClassification = ''  
+    var _selectClassification = ''
     ////////////////////////////////////////////////////////////////////////////////////////
     var row = 0
     //客戶代碼
@@ -1116,21 +1116,21 @@ define([
     var _gw_gui_carrier_id_2 = ''
     //捐贈代碼
     var _gw_gui_donation_code = ''
-    ////////////////////////////////////////////////////////////   
+    ////////////////////////////////////////////////////////////
     var _fxamount = 0.0
     ////////////////////////////////////////////////////////////
     //NE-451 進金生教育訓練-測試問題
     //檢查需相同幣別及匯率需一致
-     
+
    	invoiceDetailsArrayObject.forEach(function (_result){
-   	  log.debug({title: 'createInvoiceDetails - result', details: _result}) 
+   	  log.debug({title: 'createInvoiceDetails - result', details: _result})
 
       var _recordType = _result.recordType //invoice
       var _id = _result.id //948
       //var _valueObj = _result.values //object
       var _mainline = _result.mainline
       log.debug('_mainline', '_mainline=' + _mainline)
-      _last_id = _id 
+      _last_id = _id
       /////////////////////////////////////////////////////////////////////////////////////////////////
       //處理零稅率資訊
       if (_result.custbody_gw_customs_export_category.length != 0) {
@@ -1191,7 +1191,7 @@ define([
       }
 
       //20211007 walter modify
-      _gw_gui_main_memo = _result.custbody_gw_gui_main_memo 
+      _gw_gui_main_memo = _result.custbody_gw_gui_main_memo
 
       //Invoice統編
       _customer_ban = _result.custbody_gw_tax_id_number //99999997
@@ -1226,7 +1226,7 @@ define([
         _sales_order_number = _result.createdfrom[0].text //sales order  #42
       }
       //NE-451 進金生教育訓練-測試問題 No.2
-      if (_mainline == '*') _fxamount += stringutility.convertToFloat(_result['fxamount'])  
+      if (_mainline == '*') _fxamount += stringutility.convertToFloat(_result['fxamount'])
 
       var _amount = stringutility.convertToFloat(_result.amount) //31428.57(未稅)
       //20210707 walter modify
@@ -1288,7 +1288,7 @@ define([
         _prodcut_id = _result.item[0].value //10519
         _prodcut_text = _result.item[0].text //NI20200811000099
       }
-      
+
       /**
       log.debug('ns_item_name_field', _ns_item_name_field)
       var _item_displayname = _result[_ns_item_name_field] //SONY電視機
@@ -1297,7 +1297,7 @@ define([
       }
       */
       var _item_displayname = getInvoiceItemName(_result);
-     
+
       var _item_taxItem_rate = _result['taxRate'] //5.00%
       if (_item_taxItem_rate == '') {
         _item_taxItem_rate = '0'
@@ -1316,7 +1316,7 @@ define([
 
         //抓稅別資料
         _taxObj = getTaxInformation(_item_salestaxcodeValue)
-    
+
         if (typeof _taxObj !== 'undefined') {
           if (_taxObj.voucher_property_value == '2') _hasZeroTax = true //零稅率
 
@@ -1352,9 +1352,9 @@ define([
       if (_index_tranid != _tranid) {
         _index_tranid = _tranid
       }
-         
+
       //明細備註 Invoice
-      var _item_memo = _result.custcol_gw_item_memo     
+      var _item_memo = _result.custcol_gw_item_memo
       //20231229 currency 幣別
       var _currency_value = -1;
       var _currency_text  = '';
@@ -1362,8 +1362,8 @@ define([
     	  _currency_value = _result.currency[0].value //2
     	  _currency_text  = _result.currency[0].text  //USD
       }
-      
-      var _exchangerate = _result['exchangerate']   
+
+      var _exchangerate = _result['exchangerate']
       //20231229 Currency.exchangerate 匯率
       //var _item_exchangerate = _result['Currency.exchangerate']
       //NE-451 進金生教育訓練-測試問題 - No.3
@@ -1371,17 +1371,17 @@ define([
     	  _gw_gui_main_memo = '更正發票請於次月7日前提出，逾期恕不受理，謝謝合作！'
       }else{
     	  _gw_gui_main_memo += '|更正發票請於次月7日前提出，逾期恕不受理，謝謝合作！'
-      } 
+      }
       if (_currency_text != 'TWD') {
-          //_item_memo += 'Price: '+_item_exchangerate 
-          //_item_memo += 'Price: '+ _result['fxrate']  
-          _item_memo += 'U/P '+_currency_text+' '+ _result['fxrate']  
-     	           
-	      //NE-374 發票總備註內容 20240202 
+          //_item_memo += 'Price: '+_item_exchangerate
+          //_item_memo += 'Price: '+ _result['fxrate']
+          _item_memo += 'U/P '+_currency_text+' '+ _result['fxrate']
+
+	      //NE-374 發票總備註內容 20240202
 	      //總備註:
 	      //幣別 :
 	      //匯率 :
-	      //外幣總金額(含稅): 
+	      //外幣總金額(含稅):
           //更正發票請於次月7日前提出，逾期恕不受理，謝謝合作！
           /**
 	      if (_gw_gui_main_memo.length == 0){
@@ -1395,7 +1395,7 @@ define([
 	      _gw_gui_main_memo +='|'+'匯率 :'+_exchangerate
 	      _gw_gui_main_memo +='|'+_currency_text+'總金額(含稅) :' + _fxamount.toFixed(4)
       }
-      
+
       var _index_currency_text = _currency_text+_exchangerate
       log.debug('invoice index_currency_text', _index_currency_text)
       if (_gw_check_currency_and_exchangerate.length == 0) {
@@ -1406,10 +1406,10 @@ define([
     	  if (_chk_result == -1){
 	    	  var _check_currency_field = form.getField({id: 'custpage_check_currency_field'})
 	    	  _check_currency_field.defaultValue = 'F'
-	    	  log.debug('invoice check_currency_field.defaultValue', _check_currency_field.defaultValue)	  
+	    	  log.debug('invoice check_currency_field.defaultValue', _check_currency_field.defaultValue)
     	  }
       }
-       
+
       if (_itemtype === 'Discount') {
         //20210908 walter modify => 折扣項目作進Item, 不另外處理
         //折扣項目
@@ -1745,17 +1745,17 @@ define([
     })
     _custpage_tax_type.defaultValue = _ns_tax_type_code
     log.debug('ns_tax_type_code', _ns_tax_type_code)
-    
+
     //20231214
     var _custpage_tax_rate = form.getField({
         id: 'custpage_tax_rate'
-    })      
+    })
     if (_ns_tax_type_code=='1' || _ns_tax_type_code=='9'){
     	_custpage_tax_rate.defaultValue = '5'
     } else {
     	_custpage_tax_rate.defaultValue = '0'
-    } 
-    
+    }
+
     /////////////////////////////////////////////////////////////////////////////////////////////////
     //處理總計計部分-START
     var _sales_amount_field = form.getField({
@@ -2178,7 +2178,7 @@ define([
       displayType: serverWidget.FieldDisplayType.HIDDEN
     })
   }
-  
+
   function createCreditMemoDetails(form, creditMemoDetailsArrayObject) {
     //處理Detail
     var sublist = form.addSublist({
@@ -2187,20 +2187,20 @@ define([
       label: 'NS Credit Memo 商品清單'
     })
     //sublist.addMarkAllButtons();
-    
+
     var _gw_gui_num_start_field= form.getField({
       id: 'custbody_gw_gui_num_start'
     })
-    
-    createCreditMemoSublistFields(sublist)       
+
+    createCreditMemoSublistFields(sublist)
     ////////////////////////////////////////////////////////////////////////////////////////
     var row = 0
     /////////////////////////////////////////////////////////////////////////////////////////
     //1.處理 Invoice Detail Items
     var _selectDepartment = ''
-    var _selectClassification = ''  
+    var _selectClassification = ''
     ////////////////////////////////////////////////////////////////////////////////////////
-  
+
     //客戶代碼
     var _customer_id = 0
     //稅率
@@ -2258,7 +2258,7 @@ define([
       var _id = _result.id //948
       //var _valueObj = _result.values //object
       var _mainline = _result.mainline
-      log.debug('_mainline', '_mainline=' + _mainline)  
+      log.debug('_mainline', '_mainline=' + _mainline)
       /////////////////////////////////////////////////////////////////////////////////////////////////
       //處理零稅率資訊
       if (_result.custbody_gw_customs_export_category.length != 0) {
@@ -2367,7 +2367,7 @@ define([
         _result.taxamount
       ) //稅額總計 -5.00
       //NS 的Item金額小計
-      //var _ns_item_total_amount = stringutility.convertToFloat(_result.formulacurrency) //Item金額小計 
+      //var _ns_item_total_amount = stringutility.convertToFloat(_result.formulacurrency) //Item金額小計
       var _ns_item_total_amount = _amount + stringutility.convertToFloat(_result.taxamount)  //Item金額小計(含稅)
 
       var _linesequencenumber = _result.linesequencenumber //1
@@ -2382,7 +2382,7 @@ define([
         _prodcut_id = _result.item[0].value //10519
         _prodcut_text = _result.item[0].text //NI20200811000099
       }
-      
+
       /**
       log.debug('ns_item_name_field', _ns_item_name_field)
       var _item_displayname = _result[_ns_item_name_field] //SONY電視機
@@ -2391,7 +2391,7 @@ define([
       }
       */
       var _item_displayname = getCreditMemoItemName(_result);
-      
+
       var _item_taxItem_rate = _result['taxRate'] //5.00%
       if (_item_taxItem_rate == '') {
         _item_taxItem_rate = '0'
@@ -2440,9 +2440,9 @@ define([
       if (_quantity.trim().length == 0) _quantity = '1'
       //單位
       var _unitabbreviation = _result.unitabbreviation
-      
+
       //明細備註 Credit Memo
-      var _item_memo = _result.custcol_gw_item_memo     
+      var _item_memo = _result.custcol_gw_item_memo
       //20231229 currency 幣別
       var _currency_value = -1;
       var _currency_text  = '';
@@ -2454,22 +2454,22 @@ define([
       var _exchangerate = _result['Currency.exchangerate']
       if (_currency_text != 'TWD') {
           //_item_memo += 'Price: '+_exchangerate
-    	  //_item_memo += 'Price: '+ _result['fxrate']  
-      }  
-      
+    	  //_item_memo += 'Price: '+ _result['fxrate']
+      }
+
       var _index_currency_text = _currency_text+_exchangerate
       log.debug('credit memo index_currency_text', _index_currency_text)
       if (_gw_check_currency_and_exchangerate.length == 0) {
     	  _gw_check_currency_and_exchangerate = _index_currency_text
       } else {
-    	  var _chk_result = _gw_check_currency_and_exchangerate.indexOf(_index_currency_text) 
+    	  var _chk_result = _gw_check_currency_and_exchangerate.indexOf(_index_currency_text)
     	  log.debug('credit memo chk_result.defaultValue', _chk_result)
     	  if (_chk_result == -1){
 	    	  var _check_currency_field = form.getField({id: 'custpage_check_currency_field'})
 	    	  _check_currency_field.defaultValue = 'F'
 	    	  log.debug('credit memo check_currency_field.defaultValue', _check_currency_field.defaultValue)
-    	  } 
-      } 
+    	  }
+      }
 
       if (_itemtype === 'Discount') {
         //20210908 walter modify => 折扣項目作進Item, 不另外處理
@@ -2497,9 +2497,9 @@ define([
         //20210908 walter modify => 折扣項目作進Item, 不另外處理
         // &&  _itemtype != 'Discount'
       ) {
-    	  
+
         _gw_gui_num_start_field.defaultValue = _result.custbody_gw_gui_num_start
-    	  
+
         //抓第1筆當部門
         if (_default_department_id.length == 0) {
           _default_department_id = _selectDepartment
@@ -2577,7 +2577,7 @@ define([
         sublist.setSublistValue({
           id: 'custpage_unit_price',
           line: row,
-          value: stringutility.trimOrAppendBlank(_rate) || " "
+          value: stringutility.trimOrAppendBlank(parseFloat(_rate)) || " "
         })
         sublist.setSublistValue({
           id: 'custpage_item_quantity',
@@ -2730,16 +2730,16 @@ define([
       id: 'custpage_tax_type'
     })
     _custpage_tax_type.defaultValue = _ns_tax_type_code
-        
+
     //20231214
     var _custpage_tax_rate = form.getField({
         id: 'custpage_tax_rate'
-    })      
+    })
     if (_ns_tax_type_code=='1' || _ns_tax_type_code=='9'){
     	_custpage_tax_rate.defaultValue = '5'
     } else {
     	_custpage_tax_rate.defaultValue = '0'
-    } 
+    }
     /////////////////////////////////////////////////////////////////////////////////////////////////////
     var _sales_amount_field = form.getField({
       id: 'custpage_sales_amount'
@@ -2765,8 +2765,8 @@ define([
     _toatl_amount_field.defaultValue = _ns_SumTotalAmount.toFixed(
       _numericToFixed
     )
-    
-    
+
+
     //NE-241 小計含稅總金額
     var _sum_item_total_amount_field = form.getField({
       id: 'custpage_sum_item_total_amount'
@@ -3057,7 +3057,7 @@ define([
   function onRequest(context) {
 	//日期格式
 	_userDateFormat = gwpreferences.getDateFormat();
-	log.debug('User Date Format', _userDateFormat)  
+	log.debug('User Date Format', _userDateFormat)
     //取得開立統編
     var _selected_business_no = context.request.parameters.custpage_businessno
     log.debug(
@@ -3107,7 +3107,7 @@ define([
       displayType: serverWidget.FieldDisplayType.HIDDEN
     })
     _hiddenCheckCurrencyField.defaultValue = 'T'
-    
+
     //紀錄可扣餘額
     var _hidden_deposit_voucher_field = form.addField({
       id: 'custpage_deposit_voucher_hiddent_listid',
@@ -3206,7 +3206,7 @@ define([
 
     //form.clientScriptModulePath = './gw_invoice_ui_event_test.js'
     form.clientScriptModulePath = './gw_invoice_ui_event.js'
-    	
+
     context.response.writePage(form)
   } //End onRequest
 

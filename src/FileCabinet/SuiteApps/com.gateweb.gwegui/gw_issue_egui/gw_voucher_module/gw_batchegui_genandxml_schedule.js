@@ -82,7 +82,7 @@ define([
   var _gw_allowance_num_start_field = 'custbody_gw_allowance_num_start'
   var _gw_allowance_num_end_field = 'custbody_gw_allowance_num_end'
   var _deduction_egui_number_field = 'custbody_gw_creditmemo_deduction_list'
-	  
+
   //日期格式
   var _userDateFormat = 'YYYY/MM/DD';
 
@@ -553,7 +553,7 @@ define([
     log.debug({title: 'composeResultObject - resultArray', details: JSON.stringify(resultArray)})
     return resultArray
   }
-  
+
   //NE-472
   function getInvoiceItemName(result) {
 	  var itemName = result.custcol_ntt_iv_itemname;
@@ -562,19 +562,19 @@ define([
       //等級: 依照客戶客戶主檔設定, 新增[發票是否顯示等級]欄位, 如果此欄位is true則發票品名第二行再帶入等級
 	  var showLevel = result['customer.custentity_ntt_iv_check_show_level'];
       log.debug('showLevel', showLevel);
-      
+
       var itemLevel = "";
       if (result.custcol_ntt_td_grade.length != 0) {
-    	  itemLevel = result.custcol_ntt_td_grade[0].text;  
+    	  itemLevel = result.custcol_ntt_td_grade[0].text;
       }
-      log.debug('itemLevel', itemLevel); 
+      log.debug('itemLevel', itemLevel);
       if ((showLevel =='T' || showLevel == true) && itemLevel.length !=0) {
     	  itemName += " "+itemLevel; //第一行: 發票品名+型號 ==> 發票品名+等級
       }
-            
-      //第二行: 客戶PO/客戶料號 (自訂)==custcol_ntt_cpn_item   
-      itemName = itemName + "|" + result.otherrefnum ; //客戶PO(otherrefnum)     
-      
+
+      //第二行: 客戶PO/客戶料號 (自訂)==custcol_ntt_cpn_item
+      itemName = itemName + "|" + result.otherrefnum ; //客戶PO(otherrefnum)
+
       var customerpartnumber = "";
       if (result.custcol_ntt_cpn_item.length != 0) {
     	  customerpartnumber = result.custcol_ntt_cpn_item[0].text;  //客戶料號(自訂)
@@ -582,16 +582,16 @@ define([
       log.debug('customerpartnumber', customerpartnumber);
       if (customerpartnumber.length !=0) {
     	  itemName += ' '+ customerpartnumber;
-      }       
-            
+      }
+
       log.debug('itemName', itemName);
-      
+
       return itemName;
   }
-  
+
   //NE-384
   function getCreditMemoItemName(result) {
-	  return result.custcol_ntt_iv_itemname; 
+	  return result.custcol_ntt_iv_itemname;
   }
 
   function getVoucherInvoiceMainAndDetails(mig_type, companyInfo, internalIdAry) {
@@ -719,7 +719,7 @@ define([
           //   _account_text = result.account[0].text //4000 Sales
           // }
           if (_mainline == '*') fxamount = result['fxamount']
-       
+
           /////////////////////////////////////////////////////////////////////////////////////
           if (_mainline != '*' && stringutility.trim(_itemtype) != '') {
             _existFlag = true
@@ -769,7 +769,7 @@ define([
 				_prodcut_id = result.item[0].value //10519
 				_prodcut_text = result.item[0].text //NI20200811000099
 			}
-            
+
             /**
             var _item_displayname = result[_ns_item_name_field] //新客戶折扣
             if (_ns_item_name_field=='item.displayname') {
@@ -868,8 +868,8 @@ define([
             var _buyer_address = result.custbody_gw_gui_address
 
             ///////////////////////////////////////////////////////////////////////////////////////////////////
-            var _random_number = invoiceutility.getRandomNum(1000, 9999)			
-            var _gw_gui_main_memo = result.custbody_gw_gui_main_memo //額外備註            
+            var _random_number = invoiceutility.getRandomNum(1000, 9999)
+            var _gw_gui_main_memo = result.custbody_gw_gui_main_memo //額外備註
             var _gw_item_memo = result.custcol_gw_item_memo //項目備註
             ////////////////////////////////////////////////////////////
             //20231229 currency 幣別
@@ -888,23 +888,23 @@ define([
             }else{
             	_gw_gui_main_memo += '|更正發票請於次月7日前提出，逾期恕不受理，謝謝合作！'
             }
-            
+
             if (_currency_text != 'TWD') {
             	//_gw_item_memo += 'Price: '+_item_exchangerate
-            	//_gw_item_memo += 'Price: '+ result['fxrate']   
-            	_gw_item_memo += 'U/P '+ _currency_text+' '+result['fxrate']   
+            	//_gw_item_memo += 'Price: '+ result['fxrate']
+            	_gw_item_memo += 'U/P '+ _currency_text+' '+result['fxrate']
 	            ////////////////////////////////////////////////////////////
-	            //NE-374 發票總備註內容 20240202 
+	            //NE-374 發票總備註內容 20240202
 	            //總備註:
 	            //幣別 :
 	            //匯率 :
-	            //外幣總金額(含稅): 
+	            //外幣總金額(含稅):
             	/**
 	            if (_gw_gui_main_memo.length == 0){
 	            	_gw_gui_main_memo = '總備註:'
 	            } else {
 	            	_gw_gui_main_memo += '|'+'總備註:'
-	            } 
+	            }
             	*/
             	_gw_gui_main_memo += '|'+'總備註:'
 	           	//_gw_gui_main_memo +='|'+'幣別 :'+_currency_text
@@ -1136,7 +1136,7 @@ define([
               tax9Amount: _tax9_item_amount,
               amountObj: _amountJsonObj,
             }
-             
+
 
             //Amount Section
             _amountJsonObj.taxType = _main_tax_type
@@ -1743,7 +1743,7 @@ define([
           if (open_type == 'SINGLE-EGUIANDALLOWANCE-SCHEDULE') {
             //現開現折
             if (voucher_type == 'EGUI' && _used_remaining_usage <= 5000) break
-            else if (voucher_type != 'EGUI' && _used_remaining_usage <= 100)           
+            else if (voucher_type != 'EGUI' && _used_remaining_usage <= 100)
             break
           } else {
             if (_used_remaining_usage <= 100) break
@@ -2155,7 +2155,7 @@ define([
           title: '_assignlog_dept_code | _assignlog_class_code',
           details: `${_assignlog_dept_code} | ${_assignlog_class_code}`
         })
-        
+
         log.debug('invoiceutility.getAssignLogNumber',
                   'need_upload_mig:'+need_upload_mig +
                   ', voucher_type:'  +voucher_type +
@@ -2163,7 +2163,7 @@ define([
                   ', buyerIdentifier: '+jsonObj.buyerIdentifier +
                   ', validate.isValidGUI=' +validate.isValidGUI(jsonObj.buyerIdentifier)
                  )
-      // need_upload_mig:EGUI, voucher_type:EGUI, need_upload_mig: EGUI, buyerIdentifier: 24549210, validate.isValidGUI=true       
+      // need_upload_mig:EGUI, voucher_type:EGUI, need_upload_mig: EGUI, buyerIdentifier: 24549210, validate.isValidGUI=true
         if (need_upload_mig != 'ALL' && voucher_type != need_upload_mig) {
          /**
           _documentNumber = invoiceutility.getAssignLogNumber(
@@ -2211,7 +2211,7 @@ define([
                     ',year_month='+_year_month +
                     ',need_upload_mig='+need_upload_mig +
                     ',documentDate='+_documentDate)
-                    
+
 	          _documentNumber = invoiceutility.getAssignLogNumberAndCheckDuplicate(
 				            -1,
 				            invoice_type,
@@ -2866,7 +2866,7 @@ define([
       log.error(e.name, e.message)
     }
     log.debug('saveMainAndDeatilVoucher InvoiceObj', JSON.stringify(_invoiceObj))
-    
+
     return _invoiceObj
   }
 
@@ -3154,7 +3154,7 @@ define([
       log.error(e.name, e.message)
     }
   }
-  
+
   function syncToNetsuiteDocument(voucher_main_record, values) { 	
     try { 	
     	//有資料就不再更新           	
@@ -3196,9 +3196,9 @@ define([
 	    //零稅銷售額 
 	    values['custbody_gw_gui_sales_amt_tax_zero'] = voucher_main_record.getValue({fieldId: 'custrecord_gw_zero_sales_amount'})	 
 	    //發票部門
-	    values['custbody_gw_gui_department'] = voucher_main_record.getValue({fieldId: 'custrecord_gw_voucher_dept_code'}) 
+	    values['custbody_gw_gui_department'] = voucher_main_record.getValue({fieldId: 'custrecord_gw_voucher_dept_code'})
 	    //發票分類
-	    values['custbody_gw_gui_class'] = voucher_main_record.getValue({fieldId: 'custrecord_gw_voucher_classification'}) 
+	    values['custbody_gw_gui_class'] = voucher_main_record.getValue({fieldId: 'custrecord_gw_voucher_classification'})
 	    //營業稅申報期別  
 	    values['custbody_gw_gui_apply_period'] = voucher_main_record.getValue({fieldId: 'custrecord_gw_voucher_yearmonth'})  
 	    
@@ -3491,7 +3491,7 @@ define([
             }
 
             //var _rate                  = _result.values.rate; //3047.61904762
-            var _rate = result.rate //3047.61904762
+            var _rate = _result.values.formulanumeric //3047.61904762
 
             var _department_value = ''
             var _department_text = ''
@@ -3554,8 +3554,8 @@ define([
             var _exchangerate = result['Currency.exchangerate']
             if (_currency_text != 'TWD') {
              	//_item_remark += 'Price: '+_exchangerate
-            	//_item_remark += 'Price: '+ result['fxrate']  
-            }  
+            	//_item_remark += 'Price: '+ result['fxrate']
+            }
             //////////////////////////////////////////////////////////////////////////////////////////////////
             //統編
             //var _customer_vatregnumber = _result.values['customer.vatregnumber'];	//99999997
