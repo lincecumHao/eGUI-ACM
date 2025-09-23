@@ -3763,7 +3763,6 @@ define([
                     _voucherDetailRecord.setValue({
                       fieldId: 'custrecord_gw_unit_price',
                       value:
-                        _net_value *
                         stringutility.convertToFloat(_obj.unit_price)
                     })
                     _obj.item_total_amount =
