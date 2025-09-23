@@ -3491,7 +3491,7 @@ define([
             }
 
             //var _rate                  = _result.values.rate; //3047.61904762
-            var _rate = _result.values.formulanumeric //3047.61904762
+            var _rate = _result.values.formulanumeric || ' ' //3047.61904762
 
             var _department_value = ''
             var _department_text = ''

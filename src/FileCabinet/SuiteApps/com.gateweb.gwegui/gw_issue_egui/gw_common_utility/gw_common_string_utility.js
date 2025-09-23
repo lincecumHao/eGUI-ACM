@@ -14,7 +14,7 @@ define(['N/format'], function (format) {
   }
 
   function trim(str) {
-    if (typeof str === 'undefined' || str == null || str.length == 0) {
+    if (typeof str === 'undefined' || str == null || str.length == 0 || !str) {
       str = ''
     }
     
@@ -23,7 +23,7 @@ define(['N/format'], function (format) {
   }
 
   function trimOrAppendBlank(str) {
-    if (typeof str === 'undefined' || str == null || str.length == 0) {
+    if (typeof str === 'undefined' || str == null || str.length == 0 || !str) {
       str = ' '
     } else {
       if (typeof str === 'string') str = str.trim()
@@ -32,7 +32,7 @@ define(['N/format'], function (format) {
   }
 
   function convertToFloat(str) {
-    if (typeof str === 'undefined' || str == null || str.length == 0) {
+    if (typeof str === 'undefined' || str == null || str.length == 0 || !str || ((typeof str === 'string') && !str.trim())) {
       str = '0'
     } else {
       if (typeof str === 'string') str = str.trim()
